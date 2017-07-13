@@ -6,13 +6,11 @@
     [XmlInclude(typeof(LadderEntry))]
     [XmlInclude(typeof(OutriggersEntry))]
     [XmlInclude(typeof(RadarEntry))]
+    [XmlInclude(typeof(ToggleablePartEntry))]
     public abstract class VehicleGadgetEntry
     {
         [XmlIgnore]
         public abstract Type GadgetType { get; }
-
-        [XmlElement(IsNullable = false)]
-        public string Conditions { get; set; }
     }
 
 
@@ -106,5 +104,16 @@
         public string BoneName { get; set; }
         public float RotationSpeed { get; set; }
         public XYZ RotationAxis { get; set; }
+    }
+
+
+    [XmlType(TypeName = "ToggleablePart")]
+    public sealed class ToggleablePartEntry : VehicleGadgetEntry
+    {
+        [XmlIgnore]
+        public override Type GadgetType { get; } = typeof(ToggleablePart);
+
+        public string BoneName { get; set; }
+        public string ToggleConditions { get; set; }
     }
 }

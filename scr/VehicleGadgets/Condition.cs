@@ -25,13 +25,13 @@
             List<ConditionDelegate> delegates = new List<ConditionDelegate>();
             for (int i = 0; i < splittedConditions.Length; i++)
             {
-                if(CheckComplexConditions(splittedConditions[i], out ConditionDelegate del))
+                if(CheckComplexConditions(splittedConditions[i], out ConditionDelegate del1))
                 {
-                    delegates.Add(del);
+                    delegates.Add(del1);
                 }
-                else if(SimpleConditionsByName.TryGetValue(splittedConditions[i], out ConditionDelegate del))
+                else if(SimpleConditionsByName.TryGetValue(splittedConditions[i], out ConditionDelegate del2))
                 {
-                    delegates.Add(del);
+                    delegates.Add(del2);
                 }
                 else
                 {
