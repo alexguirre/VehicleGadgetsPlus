@@ -55,7 +55,7 @@
                 outriggers[i].Update(delta);
             }
 
-            if (isPlayerIn && Game.IsKeyDown(Keys.O) && (Conditions == null || Array.TrueForAll(Conditions, c => c(this))))
+            if (isPlayerIn && Game.IsKeyDown(Keys.O))
             {
                 if (outriggers.All(o => o.State == OutriggersState.Undeployed))
                 {

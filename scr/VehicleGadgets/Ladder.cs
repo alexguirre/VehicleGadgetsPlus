@@ -76,7 +76,7 @@
         
         public override void Update(bool isPlayerIn)
         {
-            if (!isPlayerIn || !(Conditions == null || Array.TrueForAll(Conditions, c => c(this))))
+            if (!isPlayerIn)
                 return;
             
             // left/right

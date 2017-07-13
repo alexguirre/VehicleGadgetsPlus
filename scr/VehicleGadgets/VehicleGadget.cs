@@ -11,13 +11,11 @@
     {
         public Vehicle Vehicle { get; }
         public VehicleGadgetEntry DataEntry { get; }
-        public Condition.ConditionDelegate[] Conditions { get; }
 
         protected VehicleGadget(Vehicle vehicle, VehicleGadgetEntry dataEntry)
         {
             Vehicle = vehicle;
             DataEntry = dataEntry;
-            Conditions = String.IsNullOrEmpty(dataEntry.Conditions) ? null : Condition.GetConditionsFromString(dataEntry.Conditions);
         }
 
         public abstract void Update(bool isPlayerIn);

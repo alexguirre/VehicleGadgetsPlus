@@ -34,7 +34,7 @@
 
         public override void Update(bool isPlayerIn)
         {
-            if (boneIndex != null && (Conditions == null || Array.TrueForAll(Conditions, c => c(this))))
+            if (boneIndex != null)
             {
                 NativeMatrix4x4* matrix = &(archetype->skeleton->desiredBonesMatricesArray[boneIndex.Value]);
                 Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.RotationAxis(radarDataEntry.RotationAxis, MathHelper.ConvertDegreesToRadians(radarDataEntry.RotationSpeed * Game.FrameTime)) * (*matrix);
