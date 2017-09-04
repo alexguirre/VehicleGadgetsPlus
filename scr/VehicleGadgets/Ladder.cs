@@ -11,13 +11,12 @@
     internal sealed unsafe class Ladder : VehicleGadget
     {
         readonly LadderEntry ladderDataEntry;
+
+        readonly int? ladderBaseIndex;
+        readonly int? ladderMainIndex;
+        readonly Extension[] ladderExtensions;
+        readonly int? ladderBucketIndex;
         
-        int? ladderBaseIndex;
-        int? ladderMainIndex;
-        int[] ladderExtensionsIndices;
-        int? ladderBucketIndex;
-        
-        readonly float maxExtensionDistance;
         readonly phArchetypeDamp* archetype;
 
         public Ladder(Vehicle vehicle, VehicleGadgetEntry dataEntry) : base(vehicle, dataEntry)
@@ -49,9 +48,8 @@
 
             if (ladderDataEntry.HasExtensions)
             {
-                ladderExtensionsIndices = new int[ladderDataEntry.Extensions.Length];
+                ladderExtensions = new Extension[ladderDataEntry.Extensions.Length];
 
-                string[] groupNames = inst->FragType->PhysicsLodGroup->Lod1->GetGroupNames();
 
                 for (int i = 0; i < ladderDataEntry.Extensions.Length; i++)
                 {
@@ -59,8 +57,7 @@
                     if (boneIndex == -1)
                         throw new InvalidOperationException($"The model \"{vehicle.Model.Name}\" doesn't have the bone \"{ladderDataEntry.Extensions[i].BoneName}\" for the Ladder Extension #{i}");
 
-                    ladderExtensionsIndices[i] = boneIndex;
-                    maxExtensionDistance += ladderDataEntry.Extensions[i].ExtensionDistance;
+                    ladderExtensions[i] = new Extension(this, ladderDataEntry.Extensions[i], boneIndex);
                 }
             }
 
@@ -107,6 +104,9 @@
                     Matrix m = *matrix;
                     m.Decompose(out Vector3 unused1, out Quaternion rotation, out Vector3 unused2);
 
+                    // hardcoding getting the Pitch component causes issues when the RotationAxis defined in the config isn't the same as the Axis for the Pitch component
+                    // therefore the angle should be retrieved from the quaternion based on the RotationAxis
+                    // TODO: fix Ladder angles checks
                     if (rotation.ToRotation().Pitch < ladderDataEntry.Main.MaxAngle)
                     {
                         Matrix rotMatrix = Matrix.RotationAxis(ladderDataEntry.Main.RotationAxis, MathHelper.ConvertDegreesToRadians(ladderDataEntry.Main.RotationSpeed * Game.FrameTime));
@@ -131,47 +131,21 @@
             }
 
             // extend
-            if (ladderExtensionsIndices != null)
+            if (ladderExtensions != null)
             {
                 if (Game.IsKeyDownRightNow(Keys.NumPad9))
                 {
-                    float currentDist = GetCurrentLadderExtensionDistance();
-                    if (currentDist < maxExtensionDistance)
+                    for (int i = 0; i < ladderExtensions.Length; i++)
                     {
-                        int i = 0;
-                        float d = 0.0f;
-                        for (; i < ladderDataEntry.Extensions.Length; i++)
-                        {
-                            d += ladderDataEntry.Extensions[i].ExtensionDistance;
-                            if (currentDist <= d)
-                                break;
-                        }
-
-                        NativeMatrix4x4* matrix = &(archetype->skeleton->desiredBonesMatricesArray[ladderExtensionsIndices[i]]);
-                        float moveDist = ladderDataEntry.Extensions[i].MoveSpeed * Game.FrameTime;
-                        Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.Translation(0.0f, moveDist, 0.0f) * (*matrix);
-                        *matrix = newMatrix;
+                        ladderExtensions[i].Extend();
                     }
                 }
 
                 if (Game.IsKeyDownRightNow(Keys.NumPad3))
                 {
-                    float currentDist = GetCurrentLadderExtensionDistance();
-                    if (currentDist > 0.04f)
+                    for (int i = 0; i < ladderExtensions.Length; i++)
                     {
-                        int i = ladderDataEntry.Extensions.Length - 1;
-                        float d = maxExtensionDistance;
-                        for (; i >= 0; i--)
-                        {
-                            d -= ladderDataEntry.Extensions[i].ExtensionDistance;
-                            if (currentDist > d)
-                                break;
-                        }
-
-                        NativeMatrix4x4* matrix = &(archetype->skeleton->desiredBonesMatricesArray[ladderExtensionsIndices[i]]);
-                        float moveDist = ladderDataEntry.Extensions[i].MoveSpeed * Game.FrameTime;
-                        Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.Translation(0.0f, -moveDist, 0.0f) * (*matrix);
-                        *matrix = newMatrix;
+                        ladderExtensions[i].Retract();
                     }
                 }
             }
@@ -211,24 +185,65 @@
             }
         }
 
-        private float GetCurrentLadderExtensionDistance()
+
+        private class Extension
         {
-            if (ladderExtensionsIndices == null)
-                return 0.0f;
+            private readonly LadderEntry.LadderExtension extensionData;
+            private readonly Ladder owner;
+            private readonly int boneIndex;
 
-            float dist = 0.0f;
+            public float MaxDistanceSqr { get; }
 
-            for (int i = 0; i < ladderDataEntry.Extensions.Length; i++)
+            public float CurrentDistanceSqr
             {
-                NativeMatrix4x4* matrix = &(archetype->skeleton->desiredBonesMatricesArray[ladderExtensionsIndices[i]]);
-                Vector3 translation = Util.DecomposeTranslation(*matrix);
-                Vector3 origTranslation = Util.GetBoneOriginalTranslation(Vehicle, unchecked((uint)Util.GetBoneIndex(Vehicle, ladderDataEntry.Extensions[i].BoneName)));
+                get
+                {
+                    NativeMatrix4x4* matrix = &(owner.archetype->skeleton->desiredBonesMatricesArray[boneIndex]);
+                    Vector3 translation = Util.DecomposeTranslation(*matrix);
+                    Vector3 origTranslation = Util.GetBoneOriginalTranslation(owner.Vehicle, unchecked((uint)boneIndex));
 
-                dist += Vector3.Distance(translation, origTranslation);
-                
+                    return Vector3.DistanceSquared(translation, origTranslation);
+                }
             }
 
-            return dist;
+            public Extension(Ladder owner, LadderEntry.LadderExtension data, int boneIndex)
+            {
+                this.owner = owner;
+                extensionData = data;
+                this.boneIndex = boneIndex;
+
+                MaxDistanceSqr = extensionData.ExtensionDistance * extensionData.ExtensionDistance;
+            }
+
+
+            public void Extend()
+            {
+                if (CurrentDistanceSqr >= MaxDistanceSqr)
+                    return;
+
+                NativeMatrix4x4* matrix = &(owner.archetype->skeleton->desiredBonesMatricesArray[boneIndex]);
+                float moveDist = extensionData.MoveSpeed * Game.FrameTime;
+                Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.Translation(0.0f, moveDist, 0.0f) * (*matrix);
+                *matrix = newMatrix;
+            }
+
+            public void Retract()
+            {
+                // this could cause issues with high move speeds, with move speed of 1 works fine
+                // i.e. CurrentDistance is 0.15,
+                //      the translation is -0.3,
+                //      in the next tick it will translate properly but the CurrentDistance, since it's an absolute value, will still be 0.15
+                //      next tick it will be 0.45, and will keep increasing and won't stop
+                //
+                // TODO: may need to be fixed Ladder.Extension.Retract
+                if (CurrentDistanceSqr < 0.01f * 0.01f)
+                    return;
+
+                NativeMatrix4x4* matrix = &(owner.archetype->skeleton->desiredBonesMatricesArray[boneIndex]);
+                float moveDist = extensionData.MoveSpeed * Game.FrameTime;
+                Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.Translation(0.0f, -moveDist, 0.0f) * (*matrix);
+                *matrix = newMatrix;
+            }
         }
     }
 }
