@@ -87,10 +87,15 @@
             {
                 try
                 {
+                    Game.LogTrivial($"Loading config for {Path.GetFileNameWithoutExtension(fileName)}...");
                     VehicleConfig cfg = Util.Deserialize<VehicleConfig>(fileName);
                     Model m = new Model(Path.GetFileNameWithoutExtension(fileName));
                     VehicleConfigsByModel.Add(m, cfg);
                     Game.LogTrivial($"Loaded config for {Path.GetFileNameWithoutExtension(fileName)}");
+                }
+                catch (System.InvalidOperationException ex)
+                {
+                    Game.LogTrivial($"Can't load {Path.GetFileName(fileName)}: {ex}");
                 }
                 catch (System.Xml.XmlException ex)
                 {
