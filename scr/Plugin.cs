@@ -24,17 +24,28 @@
             while (Game.IsLoading)
                 GameFiber.Sleep(1000);
 
+            bool gameFnInit = GameFunctions.Init();
+
+            if (gameFnInit)
+                Game.LogTrivialDebug($"Successful {nameof(GameFunctions)} init");
+
+            if (!gameFnInit)
+            {
+                Game.LogTrivial($"[ERROR] Failed to initialize {nameof(GameFunctions)}, unloading...");
+                Game.UnloadActivePlugin();
+            }
+
             LoadVehicleConfigs();
-            
+
             while (true)
             {
                 GameFiber.Yield();
-                
+
                 if (Game.IsPaused)
                     continue;
 
                 Vehicle playerVeh = Game.LocalPlayer.Character.CurrentVehicle;
-                
+
                 if (playerVeh && !VehiclesChecked.Contains(playerVeh))
                 {
                     CreateGadgetsForVehicle(playerVeh);
@@ -56,10 +67,6 @@
                         Gadgets.RemoveAt(i);
                     }
                 }
-
-#if DEBUG
-                DebugStuff();
-#endif
             }
         }
 
@@ -103,214 +110,5 @@
                 }
             }
         }
-
-#if DEBUG
-        private static void DebugStuff()
-        {
-            if (Game.IsKeyDown(Keys.Y))
-            {
-                VehicleConfig cfg = new VehicleConfig
-                {
-                    Gadgets = new VehicleGadgetEntry[]
-                    {
-                            new LadderEntry
-                            {
-                                Base = new LadderEntry.LadderBase
-                                {
-                                    BoneName = "ladder_base",
-                                    RotationSpeed = 11.0f,
-                                    RotationAxis = new XYZ { X = 0f, Y = 0f, Z = 1f },
-                                },
-
-                                Main = new LadderEntry.LadderMain
-                                {
-                                    BoneName = "ladder_main_0",
-                                    RotationSpeed = 11.0f,
-                                    RotationAxis = new XYZ { X = 1f, Y = 0f, Z = 0f },
-                                    MinAngle = 0.0f,
-                                    MaxAngle = 65.0f,
-                                },
-
-                                Extensions = new[]
-                                {
-                                    new LadderEntry.LadderExtension
-                                    {
-                                        BoneName = "ladder_main_1",
-                                        MoveSpeed = 3.0f,
-                                        ExtensionDistance = 6.0f,
-                                    }
-                                },
-
-                                Bucket = new LadderEntry.LadderBucket
-                                {
-                                    BoneName = "ladder_bucket",
-                                    RotationSpeed = 10.0f,
-                                    RotationAxis = new XYZ { X = 1f, Y = 0f, Z = 0f },
-                                    MinAngle = -85.0f,
-                                    MaxAngle = 85.0f,
-                                }
-                            },
-
-                            new OutriggersEntry
-                            {
-                                LeftOutriggers = new[]
-                                {
-                                    new OutriggersEntry.Outrigger
-                                    {
-                                        HorizontalBoneName = "outr_out_l1",
-                                        VerticalBoneName = "outr_down_l1",
-
-                                        HorizontalDistance = 0.8f,
-                                        HorizontalMoveSpeed = 0.625f,
-                                        VerticalDistance = 0.48f,
-                                        VerticalMoveSpeed = 0.625f,
-                                    },
-                                    new OutriggersEntry.Outrigger
-                                    {
-                                        HorizontalBoneName = "outr_out_l2",
-                                        VerticalBoneName = "outr_down_l2",
-
-                                        HorizontalDistance = 0.8f,
-                                        HorizontalMoveSpeed = 0.625f,
-                                        VerticalDistance = 0.48f,
-                                        VerticalMoveSpeed = 0.625f,
-                                    },
-                                },
-
-                                RightOutriggers = new[]
-                                {
-                                    new OutriggersEntry.Outrigger
-                                    {
-                                        HorizontalBoneName = "outr_out_r1",
-                                        VerticalBoneName = "outr_down_r1",
-
-                                        HorizontalDistance = 0.8f,
-                                        HorizontalMoveSpeed = 0.625f,
-                                        VerticalDistance = 0.48f,
-                                        VerticalMoveSpeed = 0.625f,
-                                    },
-                                    new OutriggersEntry.Outrigger
-                                    {
-                                        HorizontalBoneName = "outr_out_r2",
-                                        VerticalBoneName = "outr_down_r2",
-
-                                        HorizontalDistance = 0.8f,
-                                        HorizontalMoveSpeed = 0.625f,
-                                        VerticalDistance = 0.48f,
-                                        VerticalMoveSpeed = 0.625f,
-                                    },
-                                },
-                            },
-
-                            new RadarEntry
-                            {
-                                Conditions = "EngineOn,SirenOn",
-                                BoneName = "radar_part",
-                                RotationAxis = new XYZ { X = 0f, Y = 0f, Z = 1f },
-                                RotationSpeed = 5.0f,
-                            },
-                    }
-                };
-
-                Util.Serialize(VehicleConfigsFolder + "TEST.xml", cfg);
-            }
-        }
-#endif
     }
 }
-
-/*                    VehicleConfig cfg = new VehicleConfig
-                    {
-                        Extensions = new VehicleExtensionEntry[]
-                        {
-                            new LadderEntry
-                            {
-                                Base = new LadderEntry.LadderBase
-                                {
-                                    BoneName = "ladder_base",
-                                    RotationSpeed = 11.0f,
-                                    RotationAxis = new XYZ { X = 0f, Y = 0f, Z = 1f },
-                                },
-
-                                Main = new LadderEntry.LadderMain
-                                {
-                                    BoneName = "ladder_main_0",
-                                    RotationSpeed = 11.0f,
-                                    RotationAxis = new XYZ { X = 1f, Y = 0f, Z = 0f },
-                                    MinAngle = 0.0f,
-                                    MaxAngle = 65.0f,
-                                },
-
-                                Extensions = new[]
-                                {
-                                    new LadderEntry.LadderExtension
-                                    {
-                                        BoneName = "ladder_main_1",
-                                        MoveSpeed = 3.0f,
-                                        ExtensionDistance = 20.0f,
-                                    }
-                                },
-
-                                Bucket = new LadderEntry.LadderBucket
-                                {
-                                    BoneName = "ladder_bucket",
-                                    RotationSpeed = 10.0f,
-                                    RotationAxis = new XYZ { X = 1f, Y = 0f, Z = 0f },
-                                    MinAngle = -85.0f,
-                                    MaxAngle = 85.0f,
-                                }
-                            },
-
-                            new OutriggersEntry
-                            {
-                                LeftOutriggers = new[]
-                                {
-                                    new OutriggersEntry.Outrigger
-                                    {
-                                        HorizontalBoneName = "outr_out_l1",
-                                        VerticalBoneName = "outr_down_l1",
-
-                                        HorizontalDistance = 0.8f,
-                                        HorizontalMoveSpeed = 0.625f,
-                                        VerticalDistance = 0.48f,
-                                        VerticalMoveSpeed = 0.625f,
-                                    },
-                                    new OutriggersEntry.Outrigger
-                                    {
-                                        HorizontalBoneName = "outr_out_l2",
-                                        VerticalBoneName = "outr_down_l2",
-
-                                        HorizontalDistance = 0.8f,
-                                        HorizontalMoveSpeed = 0.625f,
-                                        VerticalDistance = 0.48f,
-                                        VerticalMoveSpeed = 0.625f,
-                                    },
-                                },
-
-                                RightOutriggers = new[]
-                                {
-                                    new OutriggersEntry.Outrigger
-                                    {
-                                        HorizontalBoneName = "outr_out_r1",
-                                        VerticalBoneName = "outr_down_r1",
-
-                                        HorizontalDistance = 0.8f,
-                                        HorizontalMoveSpeed = 0.625f,
-                                        VerticalDistance = 0.48f,
-                                        VerticalMoveSpeed = 0.625f,
-                                    },
-                                    new OutriggersEntry.Outrigger
-                                    {
-                                        HorizontalBoneName = "outr_out_r2",
-                                        VerticalBoneName = "outr_down_r2",
-
-                                        HorizontalDistance = 0.8f,
-                                        HorizontalMoveSpeed = 0.625f,
-                                        VerticalDistance = 0.48f,
-                                        VerticalMoveSpeed = 0.625f,
-                                    },
-                                },
-                            }
-                        }
-                    };
-*/

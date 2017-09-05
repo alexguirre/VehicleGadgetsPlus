@@ -15,11 +15,13 @@
 
     internal enum eBoundType : byte
     {
+        Sphere = 0,
         Capsule = 1,
         Box = 3,
         Geometry = 4,
         BVH = 8, // Bounding Volume Hierarchy
         Composite = 10,
         Disc = 12,
+        Cylinder = 13,
     }
 }

@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Memory\fragPhysicsLOD.cs" />
     <Compile Include="Memory\fragPhysicsLODGroup.cs" />
+    <Compile Include="Memory\GameFunctions.cs" />
     <Compile Include="Memory\gtaFragType.cs" />
     <Compile Include="Memory\NativeVector.cs" />
     <Compile Include="Memory\phBound.cs" />
