@@ -32,14 +32,14 @@
             return -1;
         }
 
-        public static Vector3 GetBoneOriginalTranslation(Vehicle vehicle, uint index)
+        public static Vector3 GetBoneOriginalTranslation(Vehicle vehicle, int index)
         {
             CVehicle* veh = (CVehicle*)vehicle.MemoryAddress;
             NativeVector3 v = veh->inst->archetype->skeleton->skeletonData->bones[index].translation;
             return v;
         }
 
-        public static Quaternion GetBoneOriginalRotation(Vehicle vehicle, uint index)
+        public static Quaternion GetBoneOriginalRotation(Vehicle vehicle, int index)
         {
             CVehicle* veh = (CVehicle*)vehicle.MemoryAddress;
             NativeVector4 v = veh->inst->archetype->skeleton->skeletonData->bones[index].rotation;
@@ -63,7 +63,20 @@
                 return (T)ser.Deserialize(r);
             }
         }
+    }
 
+    public sealed class XYZ
+    {
+        [XmlAttribute] public float X { get; set; }
+        [XmlAttribute] public float Y { get; set; }
+        [XmlAttribute] public float Z { get; set; }
+
+        public static implicit operator Vector3(XYZ value) => new Vector3(value.X, value.Y, value.Z);
+        public static implicit operator XYZ(Vector3 value) => new XYZ { X = value.X, Y = value.Y, Z = value.Z };
+    }
+
+    internal static class MatrixUtils
+    {
         // https://github.com/alexguirre/slimmath/blob/master/SlimMath/Matrix.cs#L559
         public static bool Decompose(Matrix matrix, out Vector3 scale, out Quaternion rotation, out Vector3 translation)
         {
@@ -113,30 +126,29 @@
 
         public static Vector3 DecomposeScale(Matrix matrix)
         {
-            Decompose(matrix, out Vector3 scale, out Quaternion rotation, out Vector3 translation);
+            Decompose(matrix, out Vector3 scale, out _, out _);
             return scale;
         }
 
         public static Quaternion DecomposeRotation(Matrix matrix)
         {
-            Decompose(matrix, out Vector3 scale, out Quaternion rotation, out Vector3 translation);
+            Decompose(matrix, out _, out Quaternion rotation, out _);
             return rotation;
         }
 
         public static Vector3 DecomposeTranslation(Matrix matrix)
         {
-            Decompose(matrix, out Vector3 scale, out Quaternion rotation, out Vector3 translation);
+            Decompose(matrix, out _, out _, out Vector3 translation);
             return translation;
         }
     }
 
-    public sealed class XYZ
+    internal static class QuaternionUtils
     {
-        [XmlAttribute] public float X { get; set; }
-        [XmlAttribute] public float Y { get; set; }
-        [XmlAttribute] public float Z { get; set; }
-
-        public static implicit operator Vector3(XYZ value) => new Vector3(value.X, value.Y, value.Z);
-        public static implicit operator XYZ(Vector3 value) => new XYZ { X = value.X, Y = value.Y, Z = value.Z };
+        public static float Angle(Quaternion a, Quaternion b)
+        {
+            float f = Quaternion.Dot(a, b);
+            return (float)(Math.Acos(Math.Min(Math.Abs(f), 1f)) * 2f * 57.29578f);
+        }
     }
 }

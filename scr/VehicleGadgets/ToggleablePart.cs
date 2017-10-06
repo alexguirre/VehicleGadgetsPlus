@@ -47,7 +47,7 @@
                 if (visible)
                 {
                     // show
-                    Vector3 origOffset = Util.GetBoneOriginalTranslation(Vehicle, (uint)boneIndex.Value);
+                    Vector3 origOffset = Util.GetBoneOriginalTranslation(Vehicle, boneIndex.Value);
                     NativeMatrix4x4* matrix = &(archetype->skeleton->desiredBonesMatricesArray[boneIndex.Value]);
                     matrix->M41 = origOffset.X;
                     matrix->M42 = origOffset.Y;
