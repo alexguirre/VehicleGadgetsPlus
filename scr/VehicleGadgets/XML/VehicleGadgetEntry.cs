@@ -24,9 +24,8 @@
         public LadderBase Base { get; set; }
         [XmlElement(IsNullable = true)]
         public LadderMain Main { get; set; }
-        [XmlArray(ElementName = "ExtensionParts", IsNullable = true)]
-        [XmlArrayItem(ElementName = "Entry")]
-        public LadderExtension[] Extensions { get; set; }
+        [XmlElement(IsNullable = true)]
+        public LadderExtensions Extensions { get; set; }
         [XmlElement(IsNullable = true)]
         public LadderBucket Bucket { get; set; }
 
@@ -35,7 +34,7 @@
         [XmlIgnore]
         public bool HasMain => Main != null;
         [XmlIgnore]
-        public bool HasExtensions => Extensions != null && Extensions.Length > 0;
+        public bool HasExtensions => Extensions != null;
         [XmlIgnore]
         public bool HasBucket => Bucket != null;
 
@@ -53,6 +52,13 @@
             public XYZ RotationAxis { get; set; }
             public float MinAngle { get; set; }
             public float MaxAngle { get; set; }
+        }
+
+        public sealed class LadderExtensions
+        {
+            public XYZ Direction { get; set; }
+            [XmlArrayItem(ElementName = "Entry")]
+            public LadderExtension[] Parts { get; set; }
         }
 
         public sealed class LadderExtension

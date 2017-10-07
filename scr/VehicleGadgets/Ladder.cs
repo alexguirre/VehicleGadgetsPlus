@@ -42,16 +42,16 @@
 
             if (ladderDataEntry.HasExtensions)
             {
-                ladderExtensions = new Extension[ladderDataEntry.Extensions.Length];
+                ladderExtensions = new Extension[ladderDataEntry.Extensions.Parts.Length];
 
-                for (int i = 0; i < ladderDataEntry.Extensions.Length; i++)
+                for (int i = 0; i < ladderDataEntry.Extensions.Parts.Length; i++)
                 {
-                    if (!VehicleBone.TryGetForVehicle(vehicle, ladderDataEntry.Extensions[i].BoneName, out VehicleBone extensionBone))
+                    if (!VehicleBone.TryGetForVehicle(vehicle, ladderDataEntry.Extensions.Parts[i].BoneName, out VehicleBone extensionBone))
                     {
-                        throw new InvalidOperationException($"The model \"{vehicle.Model.Name}\" doesn't have the bone \"{ladderDataEntry.Extensions[i].BoneName}\" for the Ladder Extension #{i}");
+                        throw new InvalidOperationException($"The model \"{vehicle.Model.Name}\" doesn't have the bone \"{ladderDataEntry.Extensions.Parts[i].BoneName}\" for the Ladder Extension #{i}");
                     }
 
-                    ladderExtensions[i] = new Extension(this, ladderDataEntry.Extensions[i], extensionBone);
+                    ladderExtensions[i] = new Extension(this, ladderDataEntry.Extensions.Parts[i], ladderDataEntry.Extensions.Direction, extensionBone);
                 }
             }
 
@@ -243,6 +243,7 @@
             private readonly LadderEntry.LadderExtension extensionData;
             private readonly Ladder owner;
             private readonly VehicleBone bone;
+            private readonly Vector3 direction;
 
             public float MaxDistanceSqr { get; }
 
@@ -257,10 +258,11 @@
                 }
             }
 
-            public Extension(Ladder owner, LadderEntry.LadderExtension data, VehicleBone bone)
+            public Extension(Ladder owner, LadderEntry.LadderExtension data, Vector3 direction, VehicleBone bone)
             {
                 this.owner = owner;
                 extensionData = data;
+                this.direction = direction;
                 this.bone = bone;
 
                 MaxDistanceSqr = extensionData.ExtensionDistance * extensionData.ExtensionDistance;
@@ -271,10 +273,9 @@
             {
                 if (CurrentDistanceSqr >= MaxDistanceSqr)
                     return;
-
-                Vector3 dir = new Vector3(0.0f, 1.0f, 0.0f);
+                
                 float moveDist = extensionData.MoveSpeed * Game.FrameTime;
-                Vector3 translation = dir * moveDist;
+                Vector3 translation = direction * moveDist;
 
                 Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.Translation(translation) * bone.Matrix;
                 float newDistanceSqr = Vector3.DistanceSquared(MatrixUtils.DecomposeTranslation(newMatrix), bone.OriginalTranslation);
@@ -291,10 +292,9 @@
                 float currentDistanceSqr = CurrentDistanceSqr;
                 if (currentDistanceSqr < 0.015f * 0.015f)
                     return;
-
-                Vector3 dir = new Vector3(0.0f, 1.0f, 0.0f);
-                float moveDist = -extensionData.MoveSpeed * Game.FrameTime;
-                Vector3 translation = dir * moveDist;
+                
+                float moveDist = extensionData.MoveSpeed * Game.FrameTime;
+                Vector3 translation = -direction * moveDist;
 
                 Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.Translation(translation) * bone.Matrix;
                 float newDistanceSqr = Vector3.DistanceSquared(MatrixUtils.DecomposeTranslation(newMatrix), bone.OriginalTranslation);

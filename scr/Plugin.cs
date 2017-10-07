@@ -16,7 +16,7 @@
 
         public static Dictionary<Model, VehicleConfig> VehicleConfigsByModel = new Dictionary<Model, VehicleConfig>();
 
-        private static HashSet<Vehicle> VehiclesChecked = new HashSet<Vehicle>();
+        private static HashSet<PoolHandle> VehiclesChecked = new HashSet<PoolHandle>();
         private static List<VehicleGadget> Gadgets = new List<VehicleGadget>();
 
         private static void Main()
@@ -46,7 +46,7 @@
 
                 Vehicle playerVeh = Game.LocalPlayer.Character.CurrentVehicle;
 
-                if (playerVeh && !VehiclesChecked.Contains(playerVeh))
+                if (playerVeh && !VehiclesChecked.Contains(playerVeh.Handle))
                 {
                     CreateGadgetsForVehicle(playerVeh);
                 }
@@ -60,9 +60,9 @@
                     }
                     else
                     {
-                        if (VehiclesChecked.Contains(g.Vehicle))
+                        if (VehiclesChecked.Contains(g.Vehicle.Handle))
                         {
-                            VehiclesChecked.Remove(g.Vehicle);
+                            VehiclesChecked.Remove(g.Vehicle.Handle);
                         }
                         Gadgets.RemoveAt(i);
                     }
@@ -82,7 +82,7 @@
             {
                 Gadgets.AddRange(gadgets);
             }
-            VehiclesChecked.Add(vehicle);
+            VehiclesChecked.Add(vehicle.Handle);
         }
 
         private static void LoadVehicleConfigs()
