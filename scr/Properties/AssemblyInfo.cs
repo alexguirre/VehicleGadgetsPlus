@@ -12,5 +12,5 @@ using Rage.Attributes;
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
 [assembly: Guid("32b66d4a-850b-455b-a1c2-fb0a2d221218")]
-[assembly: AssemblyVersion("0.1.0.*")]
+[assembly: AssemblyVersion("0.2.0.*")]
 [assembly: Plugin("Vehicle Gadgets+", Author = "alexguirre", PrefersSingleInstance = true)]

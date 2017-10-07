@@ -27,9 +27,10 @@
             bool gameFnInit = GameFunctions.Init();
 
             if (gameFnInit)
+            {
                 Game.LogTrivialDebug($"Successful {nameof(GameFunctions)} init");
-
-            if (!gameFnInit)
+            }
+            else
             {
                 Game.LogTrivial($"[ERROR] Failed to initialize {nameof(GameFunctions)}, unloading...");
                 Game.UnloadActivePlugin();

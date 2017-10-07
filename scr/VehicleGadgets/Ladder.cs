@@ -82,7 +82,7 @@
                     RotateBaseLeft();
                 }
             }
-
+            
             // up/down
             if (HasMain)
             {

@@ -1,47 +1,36 @@
 ﻿namespace VehicleGadgetsPlus.VehicleGadgets
 {
     using System;
-    using System.Windows.Forms;
 
     using Rage;
-
-    using VehicleGadgetsPlus.Memory;
+    
     using VehicleGadgetsPlus.VehicleGadgets.XML;
 
-    internal sealed unsafe class RotatingPart : VehicleGadget
+    internal sealed class RotatingPart : VehicleGadget
     {
-        readonly RotatingPartEntry rotatingPartDataEntry;
-
-        Condition.ConditionDelegate[] activationConditions;
-        int? boneIndex;
-        
-        readonly phArchetypeDamp* archetype;
+        private readonly RotatingPartEntry rotatingPartDataEntry;
+        private readonly Condition.ConditionDelegate[] activationConditions;
+        private readonly VehicleBone bone;
 
         public RotatingPart(Vehicle vehicle, VehicleGadgetEntry dataEntry) : base(vehicle, dataEntry)
         {
             rotatingPartDataEntry = (RotatingPartEntry)dataEntry;
 
-            CVehicle* veh = ((CVehicle*)vehicle.MemoryAddress);
-
-            fragInstGta* inst = veh->inst;
-            archetype = inst->archetype;
-
-            int boneIndex = Util.GetBoneIndex(vehicle, rotatingPartDataEntry.BoneName);
-            if (boneIndex == -1)
+            if (!VehicleBone.TryGetForVehicle(vehicle, rotatingPartDataEntry.BoneName, out bone))
+            {
                 throw new InvalidOperationException($"The model \"{vehicle.Model.Name}\" doesn't have the bone \"{rotatingPartDataEntry.BoneName}\" for the RotatingPart");
-
-            this.boneIndex = boneIndex;
+            }
 
             activationConditions = Condition.GetConditionsFromString(rotatingPartDataEntry.ActivationConditions);
         }
 
         public override void Update(bool isPlayerIn)
         {
-            if (boneIndex != null && (activationConditions.Length <= 0 || Array.TrueForAll(activationConditions, (c) => c(this))))
+            if (bone != null && (activationConditions.Length <= 0 || Array.TrueForAll(activationConditions, (c) => c(this))))
             {
-                NativeMatrix4x4* matrix = &(archetype->skeleton->desiredBonesMatricesArray[boneIndex.Value]);
-                Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.RotationAxis(rotatingPartDataEntry.RotationAxis, MathHelper.ConvertDegreesToRadians(rotatingPartDataEntry.RotationSpeed * Game.FrameTime)) * (*matrix);
-                *matrix = newMatrix;
+                Vector3 axis = rotatingPartDataEntry.RotationAxis;
+                float degrees = rotatingPartDataEntry.RotationSpeed * Game.FrameTime;
+                bone.RotateAxis(axis, degrees);
             }
         }
     }

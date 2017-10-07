@@ -46,7 +46,24 @@
             Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.Translation(translation) * (*matrix);
             *matrix = newMatrix;
         }
-        
+
+        public void SetRotation(Quaternion rotation)
+        {
+            NativeMatrix4x4* matrix = &(archetype->skeleton->desiredBonesMatricesArray[index]);
+            Matrix newMatrix = Matrix.Scaling(MatrixUtils.DecomposeScale(*matrix)) * Matrix.RotationQuaternion(rotation) * Matrix.Translation(MatrixUtils.DecomposeTranslation(*matrix));
+            *matrix = newMatrix;
+        }
+
+        public void SetTranslation(Vector3 translation)
+        {
+            NativeMatrix4x4* matrix = &(archetype->skeleton->desiredBonesMatricesArray[index]);
+            matrix->M41 = translation.X;
+            matrix->M42 = translation.Y;
+            matrix->M43 = translation.Z;
+        }
+
+        public void ResetRotation() => SetRotation(OriginalRotation);
+        public void ResetTranslation() => SetTranslation(OriginalTranslation);
 
 
         public static bool TryGetForVehicle(Vehicle vehicle, string boneName, out VehicleBone bone)

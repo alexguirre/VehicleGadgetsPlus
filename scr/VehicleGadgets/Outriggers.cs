@@ -5,11 +5,10 @@
     using System.Linq;
 
     using Rage;
-
-    using VehicleGadgetsPlus.Memory;
+    
     using VehicleGadgetsPlus.VehicleGadgets.XML;
 
-    internal sealed unsafe class Outriggers : VehicleGadget
+    internal sealed class Outriggers : VehicleGadget
     {
         enum OutriggersState
         {
@@ -26,24 +25,18 @@
             Down,
         }
 
-        readonly OutriggersEntry outriggersDataEntry;
-
-        Outrigger[] outriggers;
+        private readonly OutriggersEntry outriggersDataEntry;
+        private readonly Outrigger[] outriggers;
 
         public Outriggers(Vehicle vehicle, VehicleGadgetEntry dataEntry) : base(vehicle, dataEntry)
         {
             outriggersDataEntry = (OutriggersEntry)dataEntry;
 
-            outriggers = new Outrigger[outriggersDataEntry.LeftOutriggers.Length + outriggersDataEntry.RightOutriggers.Length];
+            outriggers = new Outrigger[outriggersDataEntry.Outriggers.Length];
 
-            for (int i = 0; i < outriggersDataEntry.LeftOutriggers.Length; i++)
+            for (int i = 0; i < outriggersDataEntry.Outriggers.Length; i++)
             {
-                outriggers[i] = new Outrigger(vehicle, true, outriggersDataEntry.LeftOutriggers[i]);
-            }
-
-            for (int i = 0; i < outriggersDataEntry.RightOutriggers.Length; i++)
-            {
-                outriggers[outriggersDataEntry.RightOutriggers.Length + i] = new Outrigger(vehicle, false, outriggersDataEntry.RightOutriggers[i]);
+                outriggers[i] = new Outrigger(vehicle, outriggersDataEntry.Outriggers[i]);
             }
         }
 
@@ -78,47 +71,37 @@
 
         private class Outrigger
         {
+            private readonly Vehicle vehicle;
+            private readonly OutriggersEntry.Outrigger data;
+            private readonly Vector3 extensionDirection,
+                                     supportDirection;
+            private readonly VehicleBone extensionBone,
+                                         supportBone;
+
+            float currentExtendDistance;
+            float currentSupportDistance;
+
             // TODO: read state from distances between current and original positions, otherwise when repaired and outriggers deployed, will mess things up
             public OutriggersState State { get; set; }
             public UpDownState VerticalState { get; set; }
 
-            readonly Vehicle veh;
-            readonly OutriggersEntry.Outrigger data;
-            readonly bool isLeft;
-
-            float currentOutDistance;
-            float currentDownDistance;
-
-            int outriggerHorizontalIndex;
-            int outriggerVerticalIndex;
-
-            float horizontalMoveSpeed;
-
-            readonly phArchetypeDamp* archetype;
-
-            public Outrigger(Vehicle veh, bool isLeft, OutriggersEntry.Outrigger data)
+            public Outrigger(Vehicle vehicle, OutriggersEntry.Outrigger data)
             {
-                this.veh = veh;
+                this.vehicle = vehicle;
                 this.data = data;
-                this.isLeft = isLeft;
 
-                fragInstGta* inst = ((CVehicle*)veh.MemoryAddress)->inst;
-                archetype = inst->archetype;
+                extensionDirection = data.ExtensionDirection;
+                supportDirection = data.SupportDirection;
 
-                int boneIndex = Util.GetBoneIndex(veh, data.HorizontalBoneName);
-                if (boneIndex == -1)
-                    throw new InvalidOperationException($"The model \"{veh.Model.Name}\" doesn't have the bone \"{data.HorizontalBoneName}\" for the Outrigger Horizontal");
+                if (!VehicleBone.TryGetForVehicle(vehicle, data.ExtensionBoneName, out extensionBone))
+                {
+                    throw new InvalidOperationException($"The model \"{vehicle.Model.Name}\" doesn't have the bone \"{data.ExtensionBoneName}\" for the Outrigger Extension");
+                }
 
-                outriggerHorizontalIndex = boneIndex;
-
-
-                boneIndex = Util.GetBoneIndex(veh, data.VerticalBoneName);
-                if (boneIndex == -1)
-                    throw new InvalidOperationException($"The model \"{veh.Model.Name}\" doesn't have the bone \"{data.VerticalBoneName}\" for the Outrigger Vertical");
-
-                outriggerVerticalIndex = boneIndex;
-
-                horizontalMoveSpeed = isLeft ? -data.HorizontalMoveSpeed : data.HorizontalMoveSpeed;
+                if (!VehicleBone.TryGetForVehicle(vehicle, data.SupportBoneName, out supportBone))
+                {
+                    throw new InvalidOperationException($"The model \"{vehicle.Model.Name}\" doesn't have the bone \"{data.SupportBoneName}\" for the Outrigger Support");
+                }
             }
 
             public void Update(float delta)
@@ -129,14 +112,14 @@
                         {
                             if (VerticalState == UpDownState.None) // wait for the legs to go up
                             {
-                                float moveDist = horizontalMoveSpeed * delta;
-                                currentOutDistance -= Math.Abs(moveDist);
+                                float moveDist = data.ExtensionMoveSpeed * delta;
+                                Vector3 translation = -extensionDirection * moveDist;
 
-                                NativeMatrix4x4* matrix = &(archetype->skeleton->desiredBonesMatricesArray[outriggerHorizontalIndex]);
-                                Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.Translation(-moveDist, 0.0f, 0.0f) * (*matrix);
-                                *matrix = newMatrix;
+                                currentExtendDistance -= Math.Abs(moveDist);
 
-                                if (currentOutDistance <= 0.0f)
+                                extensionBone.Translate(translation);
+
+                                if (currentExtendDistance <= 0.0f)
                                 {
                                     State = OutriggersState.Undeployed;
                                 }
@@ -145,14 +128,14 @@
                         break;
                     case OutriggersState.Deploying:
                         {
-                            float moveDist = horizontalMoveSpeed * delta;
-                            currentOutDistance += Math.Abs(moveDist);
+                            float moveDist = data.ExtensionMoveSpeed * delta;
+                            Vector3 translation = extensionDirection * moveDist;
 
-                            NativeMatrix4x4* matrix = &(archetype->skeleton->desiredBonesMatricesArray[outriggerHorizontalIndex]);
-                            Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.Translation(moveDist, 0.0f, 0.0f) * (*matrix);
-                            *matrix = newMatrix;
+                            currentExtendDistance += Math.Abs(moveDist);
 
-                            if (currentOutDistance >= data.HorizontalDistance)
+                            extensionBone.Translate(translation);
+
+                            if (currentExtendDistance >= data.ExtensionDistance)
                             {
                                 State = OutriggersState.Deployed;
                                 VerticalState = UpDownState.Down;
@@ -166,14 +149,14 @@
                 {
                     case UpDownState.Up:
                         {
-                            float moveDist = data.VerticalMoveSpeed * delta;
-                            currentDownDistance -= moveDist;
+                            float moveDist = data.SupportMoveSpeed * delta;
+                            Vector3 translation = -supportDirection * moveDist;
 
-                            NativeMatrix4x4* matrix = &(archetype->skeleton->desiredBonesMatricesArray[outriggerVerticalIndex]);
-                            Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.Translation(0.0f, 0.0f, moveDist) * (*matrix);
-                            *matrix = newMatrix;
+                            currentSupportDistance -= Math.Abs(moveDist);
 
-                            if (currentDownDistance <= 0.0f)
+                            supportBone.Translate(translation);
+
+                            if (currentSupportDistance <= 0.0f)
                             {
                                 VerticalState = UpDownState.None;
                             }
@@ -181,14 +164,14 @@
                         break;
                     case UpDownState.Down:
                         {
-                            float moveDist = data.VerticalMoveSpeed * delta;
-                            currentDownDistance += moveDist;
+                            float moveDist = data.SupportMoveSpeed * delta;
+                            Vector3 translation = supportDirection * moveDist;
 
-                            NativeMatrix4x4* matrix = &(archetype->skeleton->desiredBonesMatricesArray[outriggerVerticalIndex]);
-                            Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.Translation(0.0f, 0.0f, -moveDist) * (*matrix);
-                            *matrix = newMatrix;
+                            currentSupportDistance += Math.Abs(moveDist);
 
-                            if (currentDownDistance >= data.VerticalDistance)
+                            supportBone.Translate(translation);
+
+                            if (currentSupportDistance >= data.SupportDistance)
                             {
                                 VerticalState = UpDownState.None;
                             }

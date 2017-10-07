@@ -85,18 +85,19 @@
         [XmlIgnore]
         public override Type GadgetType { get; } = typeof(Outriggers);
 
-        public Outrigger[] LeftOutriggers { get; set; }
-        public Outrigger[] RightOutriggers { get; set; }
+        public Outrigger[] Outriggers { get; set; }
 
         public sealed class Outrigger
         {
-            public string HorizontalBoneName { get; set; }
-            public string VerticalBoneName { get; set; }
+            public string ExtensionBoneName { get; set; }
+            public XYZ ExtensionDirection { get; set; }
+            public float ExtensionDistance { get; set; }
+            public float ExtensionMoveSpeed { get; set; }
 
-            public float HorizontalDistance { get; set; }
-            public float HorizontalMoveSpeed { get; set; }
-            public float VerticalDistance { get; set; }
-            public float VerticalMoveSpeed { get; set; }
+            public string SupportBoneName { get; set; }
+            public XYZ SupportDirection { get; set; }
+            public float SupportDistance { get; set; }
+            public float SupportMoveSpeed { get; set; }
         }
     }
 
