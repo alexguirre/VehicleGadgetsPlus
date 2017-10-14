@@ -50,7 +50,8 @@
         public void SetRotation(Quaternion rotation)
         {
             NativeMatrix4x4* matrix = &(archetype->skeleton->desiredBonesMatricesArray[index]);
-            Matrix newMatrix = Matrix.Scaling(MatrixUtils.DecomposeScale(*matrix)) * Matrix.RotationQuaternion(rotation) * Matrix.Translation(MatrixUtils.DecomposeTranslation(*matrix));
+            MatrixUtils.Decompose(*matrix, out Vector3 scale, out _, out Vector3 translation);
+            Matrix newMatrix = Matrix.Scaling(scale) * Matrix.RotationQuaternion(rotation) * Matrix.Translation(translation);
             *matrix = newMatrix;
         }
 

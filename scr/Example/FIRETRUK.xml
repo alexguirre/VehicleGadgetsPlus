@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VehicleConfig xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Gadgets>
+    <Entry xsi:type="Ladder">
+      <Base>
+        <BoneName>ladder_base</BoneName>
+        <RotationSpeed>11</RotationSpeed>
+        <RotationAxis X="0" Y="0" Z="1" />
+      </Base>
+      <Main>
+        <BoneName>ladder_main_0</BoneName>
+        <RotationSpeed>11</RotationSpeed>
+        <RotationAxis X="1" Y="0" Z="0" />
+        <MinAngle>0</MinAngle>
+        <MaxAngle>65</MaxAngle>
+      </Main>
+      <Extensions>
+        <Direction X="0" Y="1" Z="0" />
+        <Parts>
+          <Entry>
+            <BoneName>ladder_main_1</BoneName>
+            <MoveSpeed>3</MoveSpeed>
+            <ExtensionDistance>6</ExtensionDistance>
+          </Entry>
+        </Parts>
+      </Extensions>
+      <Bucket>
+        <BoneName>ladder_bucket</BoneName>
+        <RotationSpeed>10</RotationSpeed>
+        <RotationAxis X="1" Y="0" Z="0" />
+        <MinAngle>-85</MinAngle>
+        <MaxAngle>85</MaxAngle>
+      </Bucket>
+    </Entry>
+    <Entry xsi:type="Outriggers">
+      <Outriggers>
+        <Outrigger>
+          <ExtensionBoneName>outr_out_l1</ExtensionBoneName>
+          <ExtensionDirection X="-1" Y="0" Z="0" />
+          <ExtensionDistance>0.8</ExtensionDistance>
+          <ExtensionMoveSpeed>0.625</ExtensionMoveSpeed>
+          <SupportBoneName>outr_down_l1</SupportBoneName>
+          <SupportDirection X="0" Y="0" Z="-1" />
+          <SupportDistance>0.48</SupportDistance>
+          <SupportMoveSpeed>0.625</SupportMoveSpeed>
+        </Outrigger>
+        <Outrigger>
+          <ExtensionBoneName>outr_out_l2</ExtensionBoneName>
+          <ExtensionDirection X="-1" Y="0" Z="0" />
+          <ExtensionDistance>0.8</ExtensionDistance>
+          <ExtensionMoveSpeed>0.625</ExtensionMoveSpeed>
+          <SupportBoneName>outr_down_l2</SupportBoneName>
+          <SupportDirection X="0" Y="0" Z="-1" />
+          <SupportDistance>0.48</SupportDistance>
+          <SupportMoveSpeed>0.625</SupportMoveSpeed>
+        </Outrigger>
+        <Outrigger>
+          <ExtensionBoneName>outr_out_r1</ExtensionBoneName>
+          <ExtensionDirection X="1" Y="0" Z="0" />
+          <ExtensionDistance>0.8</ExtensionDistance>
+          <ExtensionMoveSpeed>0.625</ExtensionMoveSpeed>
+          <SupportBoneName>outr_down_r1</SupportBoneName>
+          <SupportDirection X="0" Y="0" Z="-1" />
+          <SupportDistance>0.48</SupportDistance>
+          <SupportMoveSpeed>0.625</SupportMoveSpeed>
+        </Outrigger>
+        <Outrigger>
+          <ExtensionBoneName>outr_out_r2</ExtensionBoneName>
+          <ExtensionDirection X="1" Y="0" Z="0" />
+          <ExtensionDistance>0.8</ExtensionDistance>
+          <ExtensionMoveSpeed>0.625</ExtensionMoveSpeed>
+          <SupportBoneName>outr_down_r2</SupportBoneName>
+          <SupportDirection X="0" Y="0" Z="-1" />
+          <SupportDistance>0.48</SupportDistance>
+          <SupportMoveSpeed>0.625</SupportMoveSpeed>
+        </Outrigger>
+      </Outriggers>
+    </Entry>
+  </Gadgets>
+</VehicleConfig>
