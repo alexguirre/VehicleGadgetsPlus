@@ -76,8 +76,7 @@
                 {
                     RotateBaseRight();
                 }
-
-                if (Game.IsKeyDownRightNow(Keys.NumPad4))
+                else if (Game.IsKeyDownRightNow(Keys.NumPad4))
                 {
                     RotateBaseLeft();
                 }
@@ -90,8 +89,7 @@
                 {
                     RotateMainUp();
                 }
-
-                if (Game.IsKeyDownRightNow(Keys.NumPad2))
+                else if (Game.IsKeyDownRightNow(Keys.NumPad2))
                 {
                     RotateMainDown();
                 }
@@ -104,8 +102,7 @@
                 {
                     ExtendLadder();
                 }
-
-                if (Game.IsKeyDownRightNow(Keys.NumPad3))
+                else if (Game.IsKeyDownRightNow(Keys.NumPad3))
                 {
                     RetractLadder();
                 }
@@ -118,9 +115,7 @@
                 {
                     RotateBucketUp();
                 }
-
-
-                if (Game.IsKeyDownRightNow(Keys.NumPad1))
+                else if (Game.IsKeyDownRightNow(Keys.NumPad1))
                 {
                     RotateBucketDown();
                 }
@@ -153,12 +148,9 @@
                 return;
 
             Matrix m = ladderMain.Matrix;
-            m.Decompose(out _, out Quaternion rotation, out _);
+            float angle = GetAngle(m, ladderMain.OriginalRotation, ladderDataEntry.Main.RotationAxis);
 
-            // hardcoding getting the Pitch component causes issues when the RotationAxis defined in the config isn't the same as the Axis for the Pitch component
-            // therefore the angle should be retrieved from the quaternion based on the RotationAxis
-            // TODO: fix Ladder angles checks
-            if (rotation.ToRotation().Pitch < ladderDataEntry.Main.MaxAngle)
+            if (angle < ladderDataEntry.Main.MaxAngle)
             {
                 Vector3 axis = ladderDataEntry.Main.RotationAxis;
                 float degrees = ladderDataEntry.Main.RotationSpeed * Game.FrameTime;
@@ -172,9 +164,9 @@
                 return;
 
             Matrix m = ladderMain.Matrix;
-            m.Decompose(out _, out Quaternion rotation, out _);
+            float angle = GetAngle(m, ladderMain.OriginalRotation, ladderDataEntry.Main.RotationAxis);
 
-            if (rotation.ToRotation().Pitch > ladderDataEntry.Main.MinAngle)
+            if (angle > ladderDataEntry.Main.MinAngle)
             {
                 Vector3 axis = ladderDataEntry.Main.RotationAxis;
                 float degrees = -ladderDataEntry.Main.RotationSpeed * Game.FrameTime;
@@ -210,9 +202,9 @@
                 return;
             
             Matrix m = ladderBucket.Matrix;
-            m.Decompose(out _, out Quaternion rotation, out _);
+            float angle = GetAngle(m, ladderBucket.OriginalRotation, ladderDataEntry.Bucket.RotationAxis);
 
-            if (rotation.ToRotation().Pitch < ladderDataEntry.Bucket.MaxAngle)
+            if (angle < ladderDataEntry.Bucket.MaxAngle)
             {
                 Vector3 axis = ladderDataEntry.Bucket.RotationAxis;
                 float degrees = ladderDataEntry.Bucket.RotationSpeed * Game.FrameTime;
@@ -226,14 +218,27 @@
                 return;
 
             Matrix m = ladderBucket.Matrix;
-            m.Decompose(out _, out Quaternion rotation, out _);
+            float angle = GetAngle(m, ladderBucket.OriginalRotation, ladderDataEntry.Bucket.RotationAxis);
 
-            if (rotation.ToRotation().Pitch > ladderDataEntry.Bucket.MinAngle)
+            if (angle > ladderDataEntry.Bucket.MinAngle)
             {
                 Vector3 axis = ladderDataEntry.Bucket.RotationAxis;
                 float degrees = -ladderDataEntry.Bucket.RotationSpeed * Game.FrameTime;
                 ladderBucket.RotateAxis(axis, degrees);
             }
+        }
+
+        private float GetAngle(Matrix matrix, Quaternion originalRotation, Vector3 axis)
+        {
+            matrix.Decompose(out _, out Quaternion rotation, out _);
+
+            Vector3 rotationVector = rotation.ToVector();
+            Vector3 origRotationVector = originalRotation.ToVector();
+            Vector3 planeNormal = Vector3.Cross(axis, origRotationVector);
+
+            float angle = MathHelper.ConvertRadiansToDegrees(Math.Asin(Vector3.Dot(planeNormal, rotationVector) / (planeNormal.Length() * rotationVector.Length())));
+
+            return angle;
         }
 
 
