@@ -20,6 +20,10 @@
         public bool HasExtensions => ladderExtensions != null;
         public bool HasBucket => ladderBucket != null;
 
+        private readonly string loopSoundId;
+        private readonly string endSoundId;
+        private bool shouldPlayLoopSound;
+
         public Ladder(Vehicle vehicle, VehicleGadgetEntry dataEntry) : base(vehicle, dataEntry)
         {
             ladderDataEntry = (LadderEntry)dataEntry;
@@ -62,13 +66,31 @@
                     throw new InvalidOperationException($"The model \"{vehicle.Model.Name}\" doesn't have the bone \"{ladderDataEntry.Bucket.BoneName}\" for the Ladder Bucket");
                 }
             }
+
+            if (ladderDataEntry.HasSoundsSet)
+            {
+                loopSoundId = $"ladder_loop_{Guid.NewGuid()}";
+                endSoundId = $"ladder_end_{Guid.NewGuid()}";
+            }
         }
-        
+
+        protected override void Dispose(bool disposing)
+        {
+            if (ladderDataEntry.HasSoundsSet)
+            {
+                Plugin.SoundPlayer.Clean(loopSoundId);
+                Plugin.SoundPlayer.Clean(endSoundId);
+            }
+            base.Dispose(disposing);
+        }
+
         public override void Update(bool isPlayerIn)
         {
             if (!isPlayerIn)
                 return;
-            
+
+            shouldPlayLoopSound = false;
+
             // left/right
             if (HasBase)
             {
@@ -120,6 +142,82 @@
                     RotateBucketDown();
                 }
             }
+
+            if (ladderDataEntry.HasSoundsSet)
+            {
+                if (shouldPlayLoopSound)
+                {
+                    if (!IsPlayingLoopSound())
+                    {
+                        if (IsPlayingEndSound())
+                        {
+                            StopEndSound();
+                        }
+                        PlayLoopSound();
+                    }
+                }
+                else if (IsPlayingLoopSound())
+                {
+                    StopLoopSound();
+                    PlayEndSound();
+                }
+            }
+        }
+
+        private bool IsPlayingLoopSound()
+        {
+            return Plugin.SoundPlayer.IsPlaying(loopSoundId);
+        }
+
+        private void PlayLoopSound()
+        {
+            if (!ladderDataEntry.HasSoundsSet)
+                return;
+
+            if(ladderDataEntry.SoundsSet.IsDefaultLoop)
+            {
+                Plugin.SoundPlayer.Play(loopSoundId, true, ladderDataEntry.SoundsSet.NormalizedVolume, () => Properties.Resources.default_ladder_loop);
+            }
+            else
+            {
+                // TODO: implement custom sound loading
+            }
+        }
+
+        private void StopLoopSound()
+        {
+            if (!ladderDataEntry.HasSoundsSet)
+                return;
+
+            Plugin.SoundPlayer.Stop(loopSoundId);
+        }
+
+        private bool IsPlayingEndSound()
+        {
+            return Plugin.SoundPlayer.IsPlaying(endSoundId);
+        }
+
+        private void PlayEndSound()
+        {
+            if (!ladderDataEntry.HasSoundsSet)
+                return;
+
+            if (ladderDataEntry.SoundsSet.IsDefaultEnd)
+            {
+                Plugin.SoundPlayer.Play(endSoundId, false, ladderDataEntry.SoundsSet.NormalizedVolume, () => Properties.Resources.default_ladder_end);
+            }
+            else
+            {
+                // TODO: implement custom sound loading
+            }
+        }
+
+        private void StopEndSound()
+        {
+            if (!ladderDataEntry.HasSoundsSet)
+                return;
+
+            Plugin.SoundPlayer.Stop(endSoundId);
         }
 
         private void RotateBaseLeft()
@@ -130,6 +228,8 @@
             Vector3 axis = ladderDataEntry.Base.RotationAxis;
             float degrees = ladderDataEntry.Base.RotationSpeed * Game.FrameTime;
             ladderBase.RotateAxis(axis, degrees);
+
+            shouldPlayLoopSound = true;
         }
 
         private void RotateBaseRight()
@@ -140,6 +240,8 @@
             Vector3 axis = ladderDataEntry.Base.RotationAxis;
             float degrees = -ladderDataEntry.Base.RotationSpeed * Game.FrameTime;
             ladderBase.RotateAxis(axis, degrees);
+
+            shouldPlayLoopSound = true;
         }
 
         private void RotateMainUp()
@@ -155,6 +257,8 @@
                 Vector3 axis = ladderDataEntry.Main.RotationAxis;
                 float degrees = ladderDataEntry.Main.RotationSpeed * Game.FrameTime;
                 ladderMain.RotateAxis(axis, degrees);
+
+                shouldPlayLoopSound = true;
             }
         }
 
@@ -171,6 +275,8 @@
                 Vector3 axis = ladderDataEntry.Main.RotationAxis;
                 float degrees = -ladderDataEntry.Main.RotationSpeed * Game.FrameTime;
                 ladderMain.RotateAxis(axis, degrees);
+
+                shouldPlayLoopSound = true;
             }
         }
 
@@ -181,7 +287,10 @@
 
             for (int i = 0; i < ladderExtensions.Length; i++)
             {
-                ladderExtensions[i].Extend();
+                if (ladderExtensions[i].Extend())
+                {
+                    shouldPlayLoopSound = true;
+                }
             }
         }
 
@@ -192,7 +301,10 @@
 
             for (int i = 0; i < ladderExtensions.Length; i++)
             {
-                ladderExtensions[i].Retract();
+                if (ladderExtensions[i].Retract())
+                {
+                    shouldPlayLoopSound = true;
+                }
             }
         }
 
@@ -209,6 +321,8 @@
                 Vector3 axis = ladderDataEntry.Bucket.RotationAxis;
                 float degrees = ladderDataEntry.Bucket.RotationSpeed * Game.FrameTime;
                 ladderBucket.RotateAxis(axis, degrees);
+
+                shouldPlayLoopSound = true;
             }
         }
 
@@ -225,6 +339,8 @@
                 Vector3 axis = ladderDataEntry.Bucket.RotationAxis;
                 float degrees = -ladderDataEntry.Bucket.RotationSpeed * Game.FrameTime;
                 ladderBucket.RotateAxis(axis, degrees);
+
+                shouldPlayLoopSound = true;
             }
         }
 
@@ -274,10 +390,10 @@
             }
 
 
-            public void Extend()
+            public bool Extend()
             {
                 if (CurrentDistanceSqr >= MaxDistanceSqr)
-                    return;
+                    return false;
                 
                 float moveDist = extensionData.MoveSpeed * Game.FrameTime;
                 Vector3 translation = direction * moveDist;
@@ -287,16 +403,17 @@
 
                 // check if the new matrix overpasses the distance limits
                 if (newDistanceSqr > MaxDistanceSqr)
-                    return;
+                    return false;
 
                 bone.Translate(translation);
+                return true;
             }
 
-            public void Retract()
+            public bool Retract()
             {
                 float currentDistanceSqr = CurrentDistanceSqr;
                 if (currentDistanceSqr < 0.015f * 0.015f)
-                    return;
+                    return false;
                 
                 float moveDist = extensionData.MoveSpeed * Game.FrameTime;
                 Vector3 translation = -direction * moveDist;
@@ -306,9 +423,10 @@
 
                 // check if the new matrix overpasses the distance limits
                 if (newDistanceSqr > currentDistanceSqr)
-                    return;
+                    return false;
 
                 bone.Translate(translation);
+                return true;
             }
         }
     }

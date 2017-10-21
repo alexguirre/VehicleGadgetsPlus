@@ -1,7 +1,10 @@
 ﻿namespace VehicleGadgetsPlus.VehicleGadgets.XML
 {
     using System;
+    using System.IO;
     using System.Xml.Serialization;
+
+    using Rage;
 
     [XmlInclude(typeof(LadderEntry))]
     [XmlInclude(typeof(OutriggersEntry))]
@@ -21,6 +24,8 @@
         public override Type GadgetType { get; } = typeof(Ladder);
 
         [XmlElement(IsNullable = true)]
+        public LadderSoundsSet SoundsSet { get; set; }
+        [XmlElement(IsNullable = true)]
         public LadderBase Base { get; set; }
         [XmlElement(IsNullable = true)]
         public LadderMain Main { get; set; }
@@ -30,6 +35,8 @@
         public LadderBucket Bucket { get; set; }
 
         [XmlIgnore]
+        public bool HasSoundsSet => SoundsSet != null;
+        [XmlIgnore]
         public bool HasBase => Base != null;
         [XmlIgnore]
         public bool HasMain => Main != null;
@@ -37,6 +44,51 @@
         public bool HasExtensions => Extensions != null;
         [XmlIgnore]
         public bool HasBucket => Bucket != null;
+
+        // TODO: implement custom sounds from external files
+        public sealed class LadderSoundsSet
+        {
+            public static readonly string Default = "default";
+            
+            // 0 - 100
+            public int Volume { get; set; }
+            // "default" or filename with extension from "Vehicle Gadgets+\Sounds\"
+            public string Loop { get; set; }
+            // "default" or filename with extension from "Vehicle Gadgets+\Sounds\"
+            public string End { get; set; }
+
+            [XmlIgnore]
+            public float NormalizedVolume => MathHelper.Clamp(Volume, 0, 100) / 100.0f;
+
+            [XmlIgnore]
+            public bool IsDefaultLoop => Loop.Equals(Default, StringComparison.InvariantCultureIgnoreCase);
+            [XmlIgnore]
+            public bool IsDefaultEnd => End.Equals(Default, StringComparison.InvariantCultureIgnoreCase);
+
+            [XmlIgnore]
+            public string LoopSoundFilePath
+            {
+                get
+                {
+                    if (IsDefaultLoop)
+                        return null;
+
+                    return Path.Combine(Plugin.SoundsFolder, Loop);
+                }
+            }
+
+            [XmlIgnore]
+            public string EndSoundFilePath
+            {
+                get
+                {
+                    if (IsDefaultEnd)
+                        return null;
+
+                    return Path.Combine(Plugin.SoundsFolder, End);
+                }
+            }
+        }
 
         public sealed class LadderBase
         {
@@ -85,7 +137,12 @@
         [XmlIgnore]
         public override Type GadgetType { get; } = typeof(Outriggers);
 
+        [XmlElement(IsNullable = true)]
+        public OutriggersSoundsSet SoundsSet { get; set; }
         public Outrigger[] Outriggers { get; set; }
+
+        [XmlIgnore]
+        public bool HasSoundsSet => SoundsSet != null;
 
         public sealed class Outrigger
         {
@@ -98,6 +155,35 @@
             public XYZ SupportDirection { get; set; }
             public float SupportDistance { get; set; }
             public float SupportMoveSpeed { get; set; }
+        }
+
+        // TODO: implement custom sounds from external files
+        public sealed class OutriggersSoundsSet
+        {
+            public static readonly string Default = "default";
+
+            // 0 - 100
+            public int Volume { get; set; }
+            // "default" or filename with extension from "Vehicle Gadgets+\Sounds\"
+            public string Loop { get; set; }
+
+            [XmlIgnore]
+            public float NormalizedVolume => MathHelper.Clamp(Volume, 0, 100) / 100.0f;
+
+            [XmlIgnore]
+            public bool IsDefaultLoop => Loop.Equals(Default, StringComparison.InvariantCultureIgnoreCase);
+
+            [XmlIgnore]
+            public string LoopSoundFilePath
+            {
+                get
+                {
+                    if (IsDefaultLoop)
+                        return null;
+
+                    return Path.Combine(Plugin.SoundsFolder, Loop);
+                }
+            }
         }
     }
 

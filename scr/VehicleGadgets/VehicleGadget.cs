@@ -1,22 +1,47 @@
 ﻿namespace VehicleGadgetsPlus.VehicleGadgets
 {
     using System;
-    using System.Collections.Generic;
 
     using Rage;
 
     using VehicleGadgetsPlus.VehicleGadgets.XML;
 
-    internal abstract class VehicleGadget
+    internal abstract class VehicleGadget : IDisposable
     {
         public Vehicle Vehicle { get; }
         public VehicleGadgetEntry DataEntry { get; }
+        public bool IsDisposed { get; private set; }
 
         protected VehicleGadget(Vehicle vehicle, VehicleGadgetEntry dataEntry)
         {
             Vehicle = vehicle;
             DataEntry = dataEntry;
         }
+
+        ~VehicleGadget()
+        {
+            Dispose(false);
+        }
+
+        #region IDisposable Support
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!IsDisposed)
+            {
+                if (disposing)
+                {
+                }
+
+                IsDisposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        #endregion
 
         public abstract void Update(bool isPlayerIn);
 

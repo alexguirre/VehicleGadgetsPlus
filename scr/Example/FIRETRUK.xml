@@ -2,6 +2,11 @@
 <VehicleConfig xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Gadgets>
     <Entry xsi:type="Ladder">
+      <SoundsSet>
+        <Volume>100</Volume>
+        <Loop>default</Loop>
+        <End>default</End>
+      </SoundsSet>
       <Base>
         <BoneName>ladder_base</BoneName>
         <RotationSpeed>11</RotationSpeed>
@@ -33,6 +38,10 @@
       </Bucket>
     </Entry>
     <Entry xsi:type="Outriggers">
+      <SoundsSet>
+        <Volume>50</Volume>
+        <Loop>default</Loop>
+      </SoundsSet>
       <Outriggers>
         <Outrigger>
           <ExtensionBoneName>outr_out_l1</ExtensionBoneName>

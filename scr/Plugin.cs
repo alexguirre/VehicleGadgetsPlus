@@ -1,7 +1,6 @@
 ﻿namespace VehicleGadgetsPlus
 {
     using System.IO;
-    using System.Windows.Forms;
     using System.Collections.Generic;
 
     using Rage;
@@ -9,15 +8,18 @@
     using VehicleGadgetsPlus.Memory;
     using VehicleGadgetsPlus.VehicleGadgets;
     using VehicleGadgetsPlus.VehicleGadgets.XML;
-
+    
     internal static unsafe class Plugin
     {
         public const string VehicleConfigsFolder = "Vehicle Gadgets+/";
+        public const string SoundsFolder = VehicleConfigsFolder + "Sounds/";
+
+        private static HashSet<PoolHandle> vehiclesChecked = new HashSet<PoolHandle>();
+        private static List<VehicleGadget> gadgets = new List<VehicleGadget>();
+        private static SoundPlayer soundPlayer;
 
         public static Dictionary<Model, VehicleConfig> VehicleConfigsByModel = new Dictionary<Model, VehicleConfig>();
-
-        private static HashSet<PoolHandle> VehiclesChecked = new HashSet<PoolHandle>();
-        private static List<VehicleGadget> Gadgets = new List<VehicleGadget>();
+        public static SoundPlayer SoundPlayer => soundPlayer ?? (soundPlayer = new SoundPlayer());
 
         private static void Main()
         {
@@ -44,28 +46,29 @@
 
                 if (Game.IsPaused)
                     continue;
-
+                
                 Vehicle playerVeh = Game.LocalPlayer.Character.CurrentVehicle;
 
-                if (playerVeh && !VehiclesChecked.Contains(playerVeh.Handle))
+                if (playerVeh && !vehiclesChecked.Contains(playerVeh.Handle))
                 {
                     CreateGadgetsForVehicle(playerVeh);
                 }
 
-                for (int i = Gadgets.Count - 1; i >= 0; i--)
+                for (int i = gadgets.Count - 1; i >= 0; i--)
                 {
-                    VehicleGadget g = Gadgets[i];
+                    VehicleGadget g = gadgets[i];
                     if (g.Vehicle)
                     {
                         g.Update(g.Vehicle == playerVeh);
                     }
                     else
                     {
-                        if (VehiclesChecked.Contains(g.Vehicle.Handle))
+                        if (vehiclesChecked.Contains(g.Vehicle.Handle))
                         {
-                            VehiclesChecked.Remove(g.Vehicle.Handle);
+                            vehiclesChecked.Remove(g.Vehicle.Handle);
                         }
-                        Gadgets.RemoveAt(i);
+                        g.Dispose();
+                        gadgets.RemoveAt(i);
                     }
                 }
             }
@@ -73,17 +76,25 @@
 
         private static void OnUnload(bool isTerminating)
         {
+            for (int i = 0; i < gadgets.Count; i++)
+            {
+                VehicleGadget g = gadgets[i];
+                g.Dispose();
+            }
+            gadgets = null;
+
+            soundPlayer?.Dispose();
         }
 
 
         private static void CreateGadgetsForVehicle(Vehicle vehicle)
         {
-            VehicleGadget[] gadgets = VehicleGadget.GetGadgetsForVehicle(vehicle);
-            if (gadgets != null)
+            VehicleGadget[] g = VehicleGadget.GetGadgetsForVehicle(vehicle);
+            if (g != null)
             {
-                Gadgets.AddRange(gadgets);
+                gadgets.AddRange(g);
             }
-            VehiclesChecked.Add(vehicle.Handle);
+            vehiclesChecked.Add(vehicle.Handle);
         }
 
         private static void LoadVehicleConfigs()

@@ -28,6 +28,9 @@
         private readonly OutriggersEntry outriggersDataEntry;
         private readonly Outrigger[] outriggers;
 
+        private readonly string loopSoundId;
+        private bool wasAnyOutriggerMoving;
+
         public Outriggers(Vehicle vehicle, VehicleGadgetEntry dataEntry) : base(vehicle, dataEntry)
         {
             outriggersDataEntry = (OutriggersEntry)dataEntry;
@@ -38,15 +41,44 @@
             {
                 outriggers[i] = new Outrigger(vehicle, outriggersDataEntry.Outriggers[i]);
             }
+
+            if (outriggersDataEntry.HasSoundsSet)
+            {
+                loopSoundId = $"outriggers_loop_{Guid.NewGuid()}";
+            }
         }
 
         public override void Update(bool isPlayerIn)
         {
+            bool isAnyOutriggerMoving = false; 
+
             float delta = Game.FrameTime;
             for (int i = 0; i < outriggers.Length; i++)
             {
-                outriggers[i].Update(delta);
+                Outrigger r = outriggers[i];
+                r.Update(delta);
+                isAnyOutriggerMoving = r.State == OutriggersState.Deploying || r.State == OutriggersState.Undeploying || r.VerticalState != UpDownState.None;
             }
+
+            if (outriggersDataEntry.HasSoundsSet)
+            {
+                if (isAnyOutriggerMoving)
+                {
+                    if (!wasAnyOutriggerMoving && !IsPlayingLoopSound())
+                    {
+                        PlayLoopSound();
+                    }
+                }
+                else
+                {
+                    if (wasAnyOutriggerMoving && IsPlayingLoopSound())
+                    {
+                        StopLoopSound();
+                    }
+                }
+            }
+
+            wasAnyOutriggerMoving = isAnyOutriggerMoving;
 
             if (isPlayerIn && Game.IsKeyDown(Keys.O))
             {
@@ -66,6 +98,34 @@
                     }
                 }
             }
+        }
+
+        private bool IsPlayingLoopSound()
+        {
+            return Plugin.SoundPlayer.IsPlaying(loopSoundId);
+        }
+
+        private void PlayLoopSound()
+        {
+            if (!outriggersDataEntry.HasSoundsSet)
+                return;
+
+            if (outriggersDataEntry.SoundsSet.IsDefaultLoop)
+            {
+                Plugin.SoundPlayer.Play(loopSoundId, true, outriggersDataEntry.SoundsSet.NormalizedVolume, () => Properties.Resources.default_outriggers_loop);
+            }
+            else
+            {
+                // TODO: implement custom sound loading
+            }
+        }
+
+        private void StopLoopSound()
+        {
+            if (!outriggersDataEntry.HasSoundsSet)
+                return;
+
+            Plugin.SoundPlayer.Stop(loopSoundId);
         }
 
 
