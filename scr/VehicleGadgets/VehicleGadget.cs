@@ -28,10 +28,6 @@
         {
             if (!IsDisposed)
             {
-                if (disposing)
-                {
-                }
-
                 IsDisposed = true;
             }
         }

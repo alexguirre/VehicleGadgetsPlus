@@ -21,8 +21,8 @@
         public bool HasExtensions => ladderExtensions != null;
         public bool HasBucket => ladderBucket != null;
 
-        private readonly string loopSoundId;
-        private readonly string endSoundId;
+        private readonly Sound loopSound;
+        private readonly Sound endSound;
         private bool shouldPlayLoopSound;
 
         public Ladder(Vehicle vehicle, VehicleGadgetEntry dataEntry) : base(vehicle, dataEntry)
@@ -70,8 +70,23 @@
 
             if (ladderDataEntry.HasSoundsSet)
             {
-                loopSoundId = $"ladder_loop_{Guid.NewGuid()}";
-                endSoundId = $"ladder_end_{Guid.NewGuid()}";
+                if (ladderDataEntry.SoundsSet.IsDefaultLoop)
+                {
+                    loopSound = new Sound(true, ladderDataEntry.SoundsSet.NormalizedVolume, () => Properties.Resources.default_ladder_loop);
+                }
+                else
+                {
+                    loopSound = new Sound(true, ladderDataEntry.SoundsSet.NormalizedVolume, () => ladderDataEntry.SoundsSet.LoopSoundFilePath);
+                }
+
+                if (ladderDataEntry.SoundsSet.IsDefaultEnd)
+                {
+                    endSound = new Sound(false, ladderDataEntry.SoundsSet.NormalizedVolume, () => Properties.Resources.default_ladder_end);
+                }
+                else
+                {
+                    endSound = new Sound(false, ladderDataEntry.SoundsSet.NormalizedVolume, () => ladderDataEntry.SoundsSet.EndSoundFilePath);
+                }
             }
         }
 
@@ -79,8 +94,8 @@
         {
             if (ladderDataEntry.HasSoundsSet)
             {
-                Plugin.SoundPlayer.Clean(loopSoundId);
-                Plugin.SoundPlayer.Clean(endSoundId);
+                loopSound.Dispose();
+                endSound.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -148,78 +163,22 @@
             {
                 if (shouldPlayLoopSound)
                 {
-                    if (!IsPlayingLoopSound())
+                    if (!loopSound.IsPlaying)
                     {
-                        if (IsPlayingEndSound())
+                        if (endSound.IsPlaying)
                         {
-                            StopEndSound();
+                            endSound.Stop();
                         }
                         
-                        PlayLoopSound();
+                        loopSound.Play();
                     }
                 }
-                else if (IsPlayingLoopSound())
+                else if (loopSound.IsPlaying)
                 {
-                    StopLoopSound();
-                    PlayEndSound();
+                    loopSound.Stop();
+                    endSound.Play();
                 }
             }
-        }
-
-        private bool IsPlayingLoopSound()
-        {
-            return Plugin.SoundPlayer.IsPlaying(loopSoundId);
-        }
-
-        private void PlayLoopSound()
-        {
-            if (!ladderDataEntry.HasSoundsSet)
-                return;
-
-            if(ladderDataEntry.SoundsSet.IsDefaultLoop)
-            {
-                Plugin.SoundPlayer.Play(loopSoundId, true, ladderDataEntry.SoundsSet.NormalizedVolume, () => Properties.Resources.default_ladder_loop);
-            }
-            else
-            {
-                Plugin.SoundPlayer.Play(loopSoundId, true, ladderDataEntry.SoundsSet.NormalizedVolume, () => ladderDataEntry.SoundsSet.LoopSoundFilePath);
-            }
-        }
-
-        private void StopLoopSound()
-        {
-            if (!ladderDataEntry.HasSoundsSet)
-                return;
-
-            Plugin.SoundPlayer.Stop(loopSoundId);
-        }
-
-        private bool IsPlayingEndSound()
-        {
-            return Plugin.SoundPlayer.IsPlaying(endSoundId);
-        }
-
-        private void PlayEndSound()
-        {
-            if (!ladderDataEntry.HasSoundsSet)
-                return;
-
-            if (ladderDataEntry.SoundsSet.IsDefaultEnd)
-            {
-                Plugin.SoundPlayer.Play(endSoundId, false, ladderDataEntry.SoundsSet.NormalizedVolume, () => Properties.Resources.default_ladder_end);
-            }
-            else
-            {
-                Plugin.SoundPlayer.Play(endSoundId, false, ladderDataEntry.SoundsSet.NormalizedVolume, () => ladderDataEntry.SoundsSet.EndSoundFilePath);
-            }
-        }
-
-        private void StopEndSound()
-        {
-            if (!ladderDataEntry.HasSoundsSet)
-                return;
-
-            Plugin.SoundPlayer.Stop(endSoundId);
         }
 
         private void RotateBaseLeft()

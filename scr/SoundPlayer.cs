@@ -8,15 +8,91 @@
     using SlimDX;
     using SlimDX.Multimedia;
     using SlimDX.DirectSound;
-    
+
+    internal class Sound : IDisposable
+    {
+        public bool IsDisposed { get; private set; }
+        public string Id { get; } = Guid.NewGuid().ToString();
+        public bool Looped { get; }
+        public float Volume { get; }
+        public bool IsPlaying => SoundPlayer.Instance.IsPlaying(Id);
+
+        private readonly Func<string> filePathGetter;
+        private readonly Func<Stream> streamGetter;
+
+        public Sound(bool looped, float volume, Func<string> waveFilePathGetter)
+        {
+            Looped = looped;
+            Volume = volume;
+            filePathGetter = waveFilePathGetter;
+        }
+
+        public Sound(bool looped, float volume, Func<Stream> waveStreamGetter)
+        {
+            Looped = looped;
+            Volume = volume;
+            streamGetter = waveStreamGetter;
+        }
+
+        ~Sound()
+        {
+            Dispose(false);
+        }
+
+        public void Play()
+        {
+            if (IsDisposed)
+                throw new ObjectDisposedException($"Sound [{Id}]");
+
+            if (filePathGetter != null)
+            {
+                SoundPlayer.Instance.Play(Id, Looped, Volume, filePathGetter);
+            }
+            else
+            {
+                SoundPlayer.Instance.Play(Id, Looped, Volume, streamGetter);
+            }
+        }
+
+        public void Stop()
+        {
+            if (IsDisposed)
+                throw new ObjectDisposedException($"Sound [{Id}]");
+
+            SoundPlayer.Instance.Stop(Id);
+        }
+
+        #region IDisposable Support
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!IsDisposed)
+            {
+                SoundPlayer.Instance.Clean(Id);
+
+                IsDisposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        #endregion
+    }
+
     internal class SoundPlayer : IDisposable
     {
+        private static SoundPlayer soundPlayer;
+        public static SoundPlayer Instance => soundPlayer ?? (soundPlayer = new SoundPlayer());
+        public static bool IsInitialized => soundPlayer != null;
+
         private DirectSound dSound;
         private Dictionary<string, SecondarySoundBuffer> cache;
 
         public bool IsDisposed { get; private set; }
         
-        public SoundPlayer()
+        private SoundPlayer()
         {
             dSound = new DirectSound();
             dSound.SetCooperativeLevel(System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle, CooperativeLevel.Normal);
@@ -117,6 +193,7 @@
             if (cache.TryGetValue(id, out SecondarySoundBuffer buffer))
             {
                 buffer.Stop();
+                buffer.CurrentPlayPosition = 0;
             }
         }
 
@@ -125,10 +202,6 @@
         {
             if (!IsDisposed)
             {
-                if (disposing)
-                {
-                }
-
                 foreach (SecondarySoundBuffer b in cache.Values)
                 {
                     if (b != null)

@@ -16,10 +16,8 @@
 
         private static HashSet<PoolHandle> vehiclesChecked = new HashSet<PoolHandle>();
         private static List<VehicleGadget> gadgets = new List<VehicleGadget>();
-        private static SoundPlayer soundPlayer;
 
         public static Dictionary<Model, VehicleConfig> VehicleConfigsByModel = new Dictionary<Model, VehicleConfig>();
-        public static SoundPlayer SoundPlayer => soundPlayer ?? (soundPlayer = new SoundPlayer());
 
         private static void Main()
         {
@@ -83,7 +81,10 @@
             }
             gadgets = null;
 
-            soundPlayer?.Dispose();
+            if (SoundPlayer.IsInitialized)
+            {
+                SoundPlayer.Instance.Dispose();
+            }
         }
 
 

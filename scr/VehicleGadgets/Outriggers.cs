@@ -28,7 +28,7 @@
         private readonly OutriggersEntry outriggersDataEntry;
         private readonly Outrigger[] outriggers;
 
-        private readonly string loopSoundId;
+        private readonly Sound loopSound;
         private bool wasAnyOutriggerMoving;
 
         public Outriggers(Vehicle vehicle, VehicleGadgetEntry dataEntry) : base(vehicle, dataEntry)
@@ -44,8 +44,24 @@
 
             if (outriggersDataEntry.HasSoundsSet)
             {
-                loopSoundId = $"outriggers_loop_{Guid.NewGuid()}";
+                if (outriggersDataEntry.SoundsSet.IsDefaultLoop)
+                {
+                    loopSound = new Sound(true, outriggersDataEntry.SoundsSet.NormalizedVolume, () => Properties.Resources.default_outriggers_loop);
+                }
+                else
+                {
+                    loopSound = new Sound(true, outriggersDataEntry.SoundsSet.NormalizedVolume, () => outriggersDataEntry.SoundsSet.LoopSoundFilePath);
+                }
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (outriggersDataEntry.HasSoundsSet)
+            {
+                loopSound.Dispose();
+            }
+            base.Dispose(disposing);
         }
 
         public override void Update(bool isPlayerIn)
@@ -64,16 +80,16 @@
             {
                 if (isAnyOutriggerMoving)
                 {
-                    if (!wasAnyOutriggerMoving && !IsPlayingLoopSound())
+                    if (!wasAnyOutriggerMoving && !loopSound.IsPlaying)
                     {
-                        PlayLoopSound();
+                        loopSound.Play();
                     }
                 }
                 else
                 {
-                    if (wasAnyOutriggerMoving && IsPlayingLoopSound())
+                    if (wasAnyOutriggerMoving && loopSound.IsPlaying)
                     {
-                        StopLoopSound();
+                        loopSound.Stop();
                     }
                 }
             }
@@ -98,34 +114,6 @@
                     }
                 }
             }
-        }
-
-        private bool IsPlayingLoopSound()
-        {
-            return Plugin.SoundPlayer.IsPlaying(loopSoundId);
-        }
-
-        private void PlayLoopSound()
-        {
-            if (!outriggersDataEntry.HasSoundsSet)
-                return;
-
-            if (outriggersDataEntry.SoundsSet.IsDefaultLoop)
-            {
-                Plugin.SoundPlayer.Play(loopSoundId, true, outriggersDataEntry.SoundsSet.NormalizedVolume, () => Properties.Resources.default_outriggers_loop);
-            }
-            else
-            {
-                Plugin.SoundPlayer.Play(loopSoundId, true, outriggersDataEntry.SoundsSet.NormalizedVolume, () => outriggersDataEntry.SoundsSet.LoopSoundFilePath);
-            }
-        }
-
-        private void StopLoopSound()
-        {
-            if (!outriggersDataEntry.HasSoundsSet)
-                return;
-
-            Plugin.SoundPlayer.Stop(loopSoundId);
         }
 
 
