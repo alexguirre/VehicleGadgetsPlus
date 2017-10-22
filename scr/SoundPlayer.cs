@@ -53,7 +53,8 @@
         {
             if (!cache.TryGetValue(id, out SecondarySoundBuffer buffer))
             {
-                using (WaveStream wave = new WaveStream(getWaveStream()))
+                using (Stream stream = getWaveStream())
+                using (WaveStream wave = new WaveStream(stream))
                 {
                     SoundBufferDescription description = new SoundBufferDescription
                     {
@@ -67,6 +68,38 @@
                     wave.Read(data, 0, description.SizeInBytes);
                     buffer.Write(data, 0, LockFlags.None);
                     cache[id] = buffer;
+                }
+            }
+
+            Play(buffer, loop, volume);
+        }
+
+        public void Play(string id, bool loop, float volume, Func<string> getWaveFilePath)
+        {
+            if (!cache.TryGetValue(id, out SecondarySoundBuffer buffer))
+            {
+                string path = getWaveFilePath();
+                if (File.Exists(path))
+                {
+                    using (WaveStream wave = new WaveStream(path))
+                    {
+                        SoundBufferDescription description = new SoundBufferDescription
+                        {
+                            SizeInBytes = (int)wave.Length,
+                            Flags = BufferFlags.ControlVolume,
+                            Format = wave.Format,
+                        };
+
+                        buffer = new SecondarySoundBuffer(dSound, description);
+                        byte[] data = new byte[description.SizeInBytes];
+                        wave.Read(data, 0, description.SizeInBytes);
+                        buffer.Write(data, 0, LockFlags.None);
+                        cache[id] = buffer;
+                    }
+                }
+                else
+                {
+                    return;
                 }
             }
 

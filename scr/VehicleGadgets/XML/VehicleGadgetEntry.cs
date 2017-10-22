@@ -44,8 +44,7 @@
         public bool HasExtensions => Extensions != null;
         [XmlIgnore]
         public bool HasBucket => Bucket != null;
-
-        // TODO: implement custom sounds from external files
+        
         public sealed class LadderSoundsSet
         {
             public static readonly string Default = "default";
@@ -156,8 +155,7 @@
             public float SupportDistance { get; set; }
             public float SupportMoveSpeed { get; set; }
         }
-
-        // TODO: implement custom sounds from external files
+        
         public sealed class OutriggersSoundsSet
         {
             public static readonly string Default = "default";

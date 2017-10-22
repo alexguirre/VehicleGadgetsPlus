@@ -116,7 +116,7 @@
             }
             else
             {
-                // TODO: implement custom sound loading
+                Plugin.SoundPlayer.Play(loopSoundId, true, outriggersDataEntry.SoundsSet.NormalizedVolume, () => outriggersDataEntry.SoundsSet.LoopSoundFilePath);
             }
         }
 

@@ -1,6 +1,7 @@
 ﻿namespace VehicleGadgetsPlus.VehicleGadgets
 {
     using System;
+    using System.IO;
     using System.Windows.Forms;
 
     using Rage;
@@ -153,6 +154,7 @@
                         {
                             StopEndSound();
                         }
+                        
                         PlayLoopSound();
                     }
                 }
@@ -180,7 +182,7 @@
             }
             else
             {
-                // TODO: implement custom sound loading
+                Plugin.SoundPlayer.Play(loopSoundId, true, ladderDataEntry.SoundsSet.NormalizedVolume, () => ladderDataEntry.SoundsSet.LoopSoundFilePath);
             }
         }
 
@@ -208,7 +210,7 @@
             }
             else
             {
-                // TODO: implement custom sound loading
+                Plugin.SoundPlayer.Play(endSoundId, false, ladderDataEntry.SoundsSet.NormalizedVolume, () => ladderDataEntry.SoundsSet.EndSoundFilePath);
             }
         }
 
