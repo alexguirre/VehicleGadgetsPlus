@@ -15,9 +15,7 @@
         private Dictionary<string, SecondarySoundBuffer> cache;
 
         public bool IsDisposed { get; private set; }
-
-        public int CacheCount { get { return cache.Count; } }
-
+        
         public SoundPlayer()
         {
             dSound = new DirectSound();
@@ -77,7 +75,6 @@
 
         private void Play(SecondarySoundBuffer buffer, bool loop, float volume)
         {
-            Rage.Game.LogTrivial($"Volume: {volume} | {(int)((1.0f - volume) * -4000.0f)}");
             buffer.Volume = (int)((1.0f - volume) * -4000.0f);
             buffer.Play(0, loop ? PlayFlags.Looping : PlayFlags.None);
         }
