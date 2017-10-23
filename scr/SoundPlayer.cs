@@ -132,18 +132,7 @@
                 using (Stream stream = getWaveStream())
                 using (WaveStream wave = new WaveStream(stream))
                 {
-                    SoundBufferDescription description = new SoundBufferDescription
-                    {
-                        SizeInBytes = (int)wave.Length,
-                        Flags = BufferFlags.ControlVolume,
-                        Format = wave.Format,
-                    };
-
-                    buffer = new SecondarySoundBuffer(dSound, description);
-                    byte[] data = new byte[description.SizeInBytes];
-                    wave.Read(data, 0, description.SizeInBytes);
-                    buffer.Write(data, 0, LockFlags.None);
-                    cache[id] = buffer;
+                    buffer = CreateBuffer(id, wave);
                 }
             }
 
@@ -159,18 +148,7 @@
                 {
                     using (WaveStream wave = new WaveStream(path))
                     {
-                        SoundBufferDescription description = new SoundBufferDescription
-                        {
-                            SizeInBytes = (int)wave.Length,
-                            Flags = BufferFlags.ControlVolume,
-                            Format = wave.Format,
-                        };
-
-                        buffer = new SecondarySoundBuffer(dSound, description);
-                        byte[] data = new byte[description.SizeInBytes];
-                        wave.Read(data, 0, description.SizeInBytes);
-                        buffer.Write(data, 0, LockFlags.None);
-                        cache[id] = buffer;
+                        buffer = CreateBuffer(id, wave);
                     }
                 }
                 else
@@ -186,6 +164,23 @@
         {
             buffer.Volume = (int)((1.0f - volume) * -4000.0f);
             buffer.Play(0, loop ? PlayFlags.Looping : PlayFlags.None);
+        }
+
+        private SecondarySoundBuffer CreateBuffer(string id, WaveStream wave)
+        {
+            SoundBufferDescription description = new SoundBufferDescription
+            {
+                SizeInBytes = (int)wave.Length,
+                Flags = BufferFlags.ControlVolume,
+                Format = wave.Format,
+            };
+
+            SecondarySoundBuffer buffer = new SecondarySoundBuffer(dSound, description);
+            byte[] data = new byte[description.SizeInBytes];
+            wave.Read(data, 0, description.SizeInBytes);
+            buffer.Write(data, 0, LockFlags.None);
+            cache[id] = buffer;
+            return buffer;
         }
 
         public void Stop(string id)
