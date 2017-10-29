@@ -46,13 +46,13 @@
         {
             if(Plugin.VehicleConfigsByModel.TryGetValue(vehicle.Model, out VehicleConfig config))
             {
-                VehicleGadget[] exts = new VehicleGadget[config.Gadgets.Length];
+                VehicleGadget[] g = new VehicleGadget[config.Gadgets.Length];
                 for (int i = 0; i < config.Gadgets.Length; i++)
                 {
                     VehicleGadgetEntry entry = config.Gadgets[i];
-                    exts[i] = (VehicleGadget)Activator.CreateInstance(entry.GadgetType, vehicle, entry);
+                    g[i] = (VehicleGadget)Activator.CreateInstance(entry.GadgetType, vehicle, entry);
                 }
-                return exts;
+                return g;
             }
 
             return null;

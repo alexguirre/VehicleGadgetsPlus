@@ -4,6 +4,7 @@
     <Entry xsi:type="Ladder">
       <SoundsSet>
         <Volume>100</Volume>
+        <Begin>default</Begin>
         <Loop>default</Loop>
         <End>default</End>
       </SoundsSet>
@@ -39,8 +40,10 @@
     </Entry>
     <Entry xsi:type="Outriggers">
       <SoundsSet>
-        <Volume>50</Volume>
+        <Volume>100</Volume>
+        <Begin>default</Begin>
         <Loop>default</Loop>
+        <End>default</End>
       </SoundsSet>
       <Outriggers>
         <Outrigger>

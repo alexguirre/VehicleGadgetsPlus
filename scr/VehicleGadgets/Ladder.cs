@@ -21,9 +21,8 @@
         public bool HasExtensions => ladderExtensions != null;
         public bool HasBucket => ladderBucket != null;
 
-        private readonly Sound loopSound;
-        private readonly Sound endSound;
-        private bool shouldPlayLoopSound;
+        private readonly SoundEffect sound;
+        private bool shouldPlaySound;
 
         public Ladder(Vehicle vehicle, VehicleGadgetEntry dataEntry) : base(vehicle, dataEntry)
         {
@@ -70,33 +69,33 @@
 
             if (ladderDataEntry.HasSoundsSet)
             {
-                if (ladderDataEntry.SoundsSet.IsDefaultLoop)
-                {
-                    loopSound = new Sound(true, ladderDataEntry.SoundsSet.NormalizedVolume, () => Properties.Resources.default_ladder_loop);
-                }
-                else
-                {
-                    loopSound = new Sound(true, ladderDataEntry.SoundsSet.NormalizedVolume, () => ladderDataEntry.SoundsSet.LoopSoundFilePath);
-                }
+                Sound begin = null, loop = null, end = null;
 
-                if (ladderDataEntry.SoundsSet.IsDefaultEnd)
-                {
-                    endSound = new Sound(false, ladderDataEntry.SoundsSet.NormalizedVolume, () => Properties.Resources.default_ladder_end);
-                }
-                else
-                {
-                    endSound = new Sound(false, ladderDataEntry.SoundsSet.NormalizedVolume, () => ladderDataEntry.SoundsSet.EndSoundFilePath);
-                }
+                begin = ladderDataEntry.SoundsSet.HasBegin ?
+                            ladderDataEntry.SoundsSet.IsDefaultBegin ?
+                                null :
+                                new Sound(false, ladderDataEntry.SoundsSet.NormalizedVolume, () => ladderDataEntry.SoundsSet.BeginSoundFilePath) :
+                            null;
+
+                loop = ladderDataEntry.SoundsSet.HasLoop ?
+                            ladderDataEntry.SoundsSet.IsDefaultLoop ?
+                                new Sound(true, ladderDataEntry.SoundsSet.NormalizedVolume, () => Properties.Resources.default_ladder_loop) :
+                                new Sound(true, ladderDataEntry.SoundsSet.NormalizedVolume, () => ladderDataEntry.SoundsSet.LoopSoundFilePath) :
+                            null;
+
+                end = ladderDataEntry.SoundsSet.HasEnd ?
+                            ladderDataEntry.SoundsSet.IsDefaultEnd ?
+                                new Sound(false, ladderDataEntry.SoundsSet.NormalizedVolume, () => Properties.Resources.default_ladder_end) :
+                                new Sound(false, ladderDataEntry.SoundsSet.NormalizedVolume, () => ladderDataEntry.SoundsSet.EndSoundFilePath) :
+                            null;
+
+                sound = new SoundEffect(begin, loop, end);
             }
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (ladderDataEntry.HasSoundsSet)
-            {
-                loopSound.Dispose();
-                endSound.Dispose();
-            }
+            sound?.Dispose();
             base.Dispose(disposing);
         }
 
@@ -105,8 +104,8 @@
             if (!isPlayerIn)
                 return;
 
-            shouldPlayLoopSound = false;
-
+            shouldPlaySound = false;
+            
             // left/right
             if (HasBase)
             {
@@ -159,25 +158,18 @@
                 }
             }
 
-            if (ladderDataEntry.HasSoundsSet)
+            if (sound != null)
             {
-                if (shouldPlayLoopSound)
+                if (shouldPlaySound)
                 {
-                    if (!loopSound.IsPlaying)
-                    {
-                        if (endSound.IsPlaying)
-                        {
-                            endSound.Stop();
-                        }
-                        
-                        loopSound.Play();
-                    }
+                    sound.Play();
                 }
-                else if (loopSound.IsPlaying)
+                else
                 {
-                    loopSound.Stop();
-                    endSound.Play();
+                    sound.Stop();
                 }
+
+                sound.Update();
             }
         }
 
@@ -190,7 +182,7 @@
             float degrees = ladderDataEntry.Base.RotationSpeed * Game.FrameTime;
             ladderBase.RotateAxis(axis, degrees);
 
-            shouldPlayLoopSound = true;
+            shouldPlaySound = true;
         }
 
         private void RotateBaseRight()
@@ -202,7 +194,7 @@
             float degrees = -ladderDataEntry.Base.RotationSpeed * Game.FrameTime;
             ladderBase.RotateAxis(axis, degrees);
 
-            shouldPlayLoopSound = true;
+            shouldPlaySound = true;
         }
 
         private void RotateMainUp()
@@ -219,7 +211,7 @@
                 float degrees = ladderDataEntry.Main.RotationSpeed * Game.FrameTime;
                 ladderMain.RotateAxis(axis, degrees);
 
-                shouldPlayLoopSound = true;
+                shouldPlaySound = true;
             }
         }
 
@@ -237,7 +229,7 @@
                 float degrees = -ladderDataEntry.Main.RotationSpeed * Game.FrameTime;
                 ladderMain.RotateAxis(axis, degrees);
 
-                shouldPlayLoopSound = true;
+                shouldPlaySound = true;
             }
         }
 
@@ -250,7 +242,7 @@
             {
                 if (ladderExtensions[i].Extend())
                 {
-                    shouldPlayLoopSound = true;
+                    shouldPlaySound = true;
                 }
             }
         }
@@ -264,7 +256,7 @@
             {
                 if (ladderExtensions[i].Retract())
                 {
-                    shouldPlayLoopSound = true;
+                    shouldPlaySound = true;
                 }
             }
         }
@@ -283,7 +275,7 @@
                 float degrees = ladderDataEntry.Bucket.RotationSpeed * Game.FrameTime;
                 ladderBucket.RotateAxis(axis, degrees);
 
-                shouldPlayLoopSound = true;
+                shouldPlaySound = true;
             }
         }
 
@@ -301,7 +293,7 @@
                 float degrees = -ladderDataEntry.Bucket.RotationSpeed * Game.FrameTime;
                 ladderBucket.RotateAxis(axis, degrees);
 
-                shouldPlayLoopSound = true;
+                shouldPlaySound = true;
             }
         }
 

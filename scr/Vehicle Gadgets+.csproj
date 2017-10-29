@@ -82,6 +82,7 @@
     <Compile Include="VehicleGadgets\Ladder.cs" />
     <Compile Include="VehicleGadgets\Outriggers.cs" />
     <Compile Include="VehicleGadgets\RotatingPart.cs" />
+    <Compile Include="VehicleGadgets\SoundEffect.cs" />
     <Compile Include="VehicleGadgets\ToggleablePart.cs" />
     <Compile Include="VehicleGadgets\VehicleGadget.cs" />
     <Compile Include="VehicleGadgets\XML\VehicleConfig.cs" />

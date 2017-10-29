@@ -28,8 +28,7 @@
         private readonly OutriggersEntry outriggersDataEntry;
         private readonly Outrigger[] outriggers;
 
-        private readonly Sound loopSound;
-        private bool wasAnyOutriggerMoving;
+        private readonly SoundEffect sound;
 
         public Outriggers(Vehicle vehicle, VehicleGadgetEntry dataEntry) : base(vehicle, dataEntry)
         {
@@ -44,23 +43,33 @@
 
             if (outriggersDataEntry.HasSoundsSet)
             {
-                if (outriggersDataEntry.SoundsSet.IsDefaultLoop)
-                {
-                    loopSound = new Sound(true, outriggersDataEntry.SoundsSet.NormalizedVolume, () => Properties.Resources.default_outriggers_loop);
-                }
-                else
-                {
-                    loopSound = new Sound(true, outriggersDataEntry.SoundsSet.NormalizedVolume, () => outriggersDataEntry.SoundsSet.LoopSoundFilePath);
-                }
+                Sound begin = null, loop = null, end = null;
+
+                begin = outriggersDataEntry.SoundsSet.HasBegin ?
+                            outriggersDataEntry.SoundsSet.IsDefaultBegin ?
+                                null :
+                                new Sound(false, outriggersDataEntry.SoundsSet.NormalizedVolume, () => outriggersDataEntry.SoundsSet.BeginSoundFilePath) :
+                            null;
+
+                loop = outriggersDataEntry.SoundsSet.HasLoop ?
+                            outriggersDataEntry.SoundsSet.IsDefaultLoop ?
+                                new Sound(true, outriggersDataEntry.SoundsSet.NormalizedVolume, () => Properties.Resources.default_outriggers_loop) :
+                                new Sound(true, outriggersDataEntry.SoundsSet.NormalizedVolume, () => outriggersDataEntry.SoundsSet.LoopSoundFilePath) :
+                            null;
+
+                end = outriggersDataEntry.SoundsSet.HasEnd ?
+                            outriggersDataEntry.SoundsSet.IsDefaultEnd ?
+                                null :
+                                new Sound(false, outriggersDataEntry.SoundsSet.NormalizedVolume, () => outriggersDataEntry.SoundsSet.EndSoundFilePath) :
+                            null;
+
+                sound = new SoundEffect(begin, loop, end);
             }
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (outriggersDataEntry.HasSoundsSet)
-            {
-                loopSound.Dispose();
-            }
+            sound?.Dispose();
             base.Dispose(disposing);
         }
 
@@ -76,25 +85,19 @@
                 isAnyOutriggerMoving = r.State == OutriggersState.Deploying || r.State == OutriggersState.Undeploying || r.VerticalState != UpDownState.None;
             }
 
-            if (outriggersDataEntry.HasSoundsSet)
+            if (sound != null)
             {
                 if (isAnyOutriggerMoving)
                 {
-                    if (!wasAnyOutriggerMoving && !loopSound.IsPlaying)
-                    {
-                        loopSound.Play();
-                    }
+                    sound.Play();
                 }
                 else
                 {
-                    if (wasAnyOutriggerMoving && loopSound.IsPlaying)
-                    {
-                        loopSound.Stop();
-                    }
+                    sound.Stop();
                 }
-            }
 
-            wasAnyOutriggerMoving = isAnyOutriggerMoving;
+                sound.Update();
+            }
 
             if (isPlayerIn && Game.IsKeyDown(Keys.O))
             {
