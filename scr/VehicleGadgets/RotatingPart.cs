@@ -9,8 +9,9 @@
     internal sealed class RotatingPart : VehicleGadget
     {
         private readonly RotatingPartEntry rotatingPartDataEntry;
-        private readonly Condition.ConditionDelegate[] activationConditions;
+        private readonly Conditions.ConditionDelegate[] conditions;
         private readonly VehicleBone bone;
+        private bool rotating;
 
         public RotatingPart(Vehicle vehicle, VehicleGadgetEntry dataEntry) : base(vehicle, dataEntry)
         {
@@ -21,17 +22,40 @@
                 throw new InvalidOperationException($"The model \"{vehicle.Model.Name}\" doesn't have the bone \"{rotatingPartDataEntry.BoneName}\" for the {RotatingPartEntry.XmlName}");
             }
 
-            activationConditions = Condition.GetConditionsFromString(rotatingPartDataEntry.ActivationConditions);
+            conditions = Conditions.GetConditionsFromString(vehicle.Model, rotatingPartDataEntry.Conditions);
         }
 
         public override void Update(bool isPlayerIn)
         {
-            if (bone != null && (activationConditions.Length <= 0 || Array.TrueForAll(activationConditions, (c) => c(this))))
+            if (bone != null)
             {
-                Vector3 axis = rotatingPartDataEntry.RotationAxis;
-                float degrees = rotatingPartDataEntry.RotationSpeed * Game.FrameTime;
-                bone.RotateAxis(axis, degrees);
+                if (isPlayerIn)
+                {
+                    if (rotatingPartDataEntry.IsToggle)
+                    {
+                        if (CheckConditions())
+                        {
+                            rotating = !rotating;
+                        }
+                    }
+                    else
+                    {
+                        rotating = CheckConditions();
+                    }
+                }
+
+                if (rotating)
+                {
+                    Vector3 axis = rotatingPartDataEntry.RotationAxis;
+                    float degrees = rotatingPartDataEntry.RotationSpeed * Game.FrameTime;
+                    bone.RotateAxis(axis, degrees);
+                }
             }
+        }
+
+        private bool CheckConditions()
+        {
+            return (conditions.Length <= 0 || Array.TrueForAll(conditions, (c) => c(Vehicle)));
         }
     }
 }

@@ -8,9 +8,10 @@
     {
         public const string XmlName = nameof(HideablePart);
 
-        [XmlIgnore] public override Type GadgetType { get; } = typeof(HideablePartEntry);
+        [XmlIgnore] public override Type GadgetType { get; } = typeof(HideablePart);
 
         public string BoneName { get; set; }
-        public string ToggleConditions { get; set; }
+        public bool IsToggle { get; set; }
+        public string Conditions { get; set; }
     }
 }

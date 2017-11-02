@@ -2,6 +2,7 @@
 {
     using System;
     using System.IO;
+    using System.Xml.Serialization;
 
     using Rage;
     using Rage.Exceptions;
@@ -66,7 +67,7 @@
 
     internal static class MatrixUtils
     {
-        // https://github.com/alexguirre/slimmath/blob/master/SlimMath/Matrix.cs#L559
+        // https://code.google.com/archive/p/slimmath/
         public static bool Decompose(Matrix matrix, out Vector3 scale, out Quaternion rotation, out Vector3 translation)
         {
             const float ZeroTolerance = 1e-6f;

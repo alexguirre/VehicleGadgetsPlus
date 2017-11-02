@@ -8,11 +8,13 @@
     using VehicleGadgetsPlus.Memory;
     using VehicleGadgetsPlus.VehicleGadgets;
     using VehicleGadgetsPlus.VehicleGadgets.XML;
-    
+    using VehicleGadgetsPlus.VehicleGadgets.XML.Conditions;
+
     internal static unsafe class Plugin
     {
         public const string VehicleConfigsFolder = "Vehicle Gadgets+/";
         public const string SoundsFolder = VehicleConfigsFolder + "Sounds/";
+        public const string ConditionsFolder = VehicleConfigsFolder + "Conditions/";
 
         private static HashSet<PoolHandle> vehiclesChecked = new HashSet<PoolHandle>();
         private static List<VehicleGadget> gadgets = new List<VehicleGadget>();
@@ -103,6 +105,7 @@
             if (!Directory.Exists(VehicleConfigsFolder))
                 Directory.CreateDirectory(VehicleConfigsFolder);
 
+            Dictionary<Model, ConditionEntry[]> extraConditions = null;
             foreach (string fileName in Directory.EnumerateFiles(VehicleConfigsFolder, "*.xml", SearchOption.TopDirectoryOnly))
             {
                 try
@@ -111,6 +114,13 @@
                     Game.LogTrivial($"Loading config for {modelName}...");
                     VehicleConfig cfg = Util.Deserialize<VehicleConfig>(fileName);
                     Model m = new Model(modelName);
+                    if(cfg.ExtraConditions != null && cfg.ExtraConditions.Length > 0)
+                    {
+                        if (extraConditions == null)
+                            extraConditions = new Dictionary<Model, ConditionEntry[]>();
+
+                        extraConditions.Add(m, cfg.ExtraConditions);
+                    }
                     VehicleConfigsByModel.Add(m, cfg);
                     Game.LogTrivial($"Loaded config for {modelName}");
                 }
@@ -123,6 +133,8 @@
                     Game.LogTrivial($"Can't load {Path.GetFileName(fileName)}: {ex}");
                 }
             }
+
+            Conditions.CompileConditions(extraConditions);
         }
     }
 }

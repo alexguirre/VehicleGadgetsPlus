@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VehicleConfig xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ExtraConditions>
+    <Condition>
+      <Name>Moving</Name>
+      <Code><![CDATA[return vehicle.Speed > 8.0f;]]></Code>
+    </Condition>
+    <Condition>
+      <Name>KeyDown</Name>
+      <Code><![CDATA[return Game.IsKeyDown(Keys.Y);]]></Code>
+    </Condition>
+    <Condition>
+      <Name>KeyDownRightNow</Name>
+      <Code><![CDATA[return Game.IsKeyDownRightNow(Keys.J);]]></Code>
+    </Condition>
+  </ExtraConditions>
+  <Gadgets>
+    <Entry xsi:type="RotatingPart">
+      <BoneName>bumper_f</BoneName>
+      <RotationSpeed>60</RotationSpeed>
+      <RotationAxis X="0" Y="0" Z="1" />
+      <IsToggle>false</IsToggle>
+      <Conditions>Moving</Conditions>
+    </Entry>
+    <Entry xsi:type="RotatingPart">
+      <BoneName>bumper_f</BoneName>
+      <RotationSpeed>1000</RotationSpeed>
+      <RotationAxis X="0" Y="0" Z="1" />
+      <IsToggle>true</IsToggle>
+      <Conditions>KeyDown</Conditions>
+    </Entry>
+    <Entry xsi:type="RotatingPart">
+      <BoneName>bumper_f</BoneName>
+      <RotationSpeed>1000</RotationSpeed>
+      <RotationAxis X="0" Y="0" Z="1" />
+      <IsToggle>false</IsToggle>
+      <Conditions>KeyDownRightNow</Conditions>
+    </Entry>
+    <Entry xsi:type="HideablePart">
+      <BoneName>bumper_r</BoneName>
+      <IsToggle>true</IsToggle>
+      <Conditions>KeyDown</Conditions>
+    </Entry>
+    <Entry xsi:type="HideablePart">
+      <BoneName>bumper_r</BoneName>
+      <IsToggle>false</IsToggle>
+      <Conditions>KeyDownRightNow</Conditions>
+    </Entry>
+  </Gadgets>
+</VehicleConfig>

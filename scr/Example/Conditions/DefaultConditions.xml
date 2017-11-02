@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ConditionsConfig xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Conditions>
+    <Condition>
+      <Name>EngineOn</Name>
+      <Code><![CDATA[return vehicle.IsEngineOn;]]></Code>
+    </Condition>
+    <Condition>
+      <Name>EngineOff</Name>
+      <Code><![CDATA[return !vehicle.IsEngineOn;]]></Code>
+    </Condition>
+    <Condition>
+      <Name>SirenOn</Name>
+      <Code><![CDATA[return vehicle.IsSirenOn;]]></Code>
+    </Condition>
+    <Condition>
+      <Name>SirenOff</Name>
+      <Code><![CDATA[return !vehicle.IsSirenOn;]]></Code>
+    </Condition>
+  </Conditions>
+</ConditionsConfig>

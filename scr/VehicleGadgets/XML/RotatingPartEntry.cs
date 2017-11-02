@@ -13,8 +13,9 @@
         [XmlIgnore] public override Type GadgetType { get; } = typeof(RotatingPart);
 
         public string BoneName { get; set; }
-        public string ActivationConditions { get; set; }
         public float RotationSpeed { get; set; }
         [XmlElement(Type = typeof(XmlVector3))] public Vector3 RotationAxis { get; set; }
+        public bool IsToggle { get; set; }
+        public string Conditions { get; set; }
     }
 }
