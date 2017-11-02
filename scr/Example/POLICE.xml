@@ -10,10 +10,18 @@
       <Code><![CDATA[return Game.IsKeyDown(Keys.Y);]]></Code>
     </Condition>
     <Condition>
+      <Name>KeyDownInsideOnly</Name>
+      <Code><![CDATA[return isPlayerInsideVehicle ? Game.IsKeyDown(Keys.U) : (bool?)null;]]></Code>
+    </Condition>
+    <Condition>
       <Name>KeyDownRightNow</Name>
       <Code><![CDATA[return Game.IsKeyDownRightNow(Keys.J);]]></Code>
     </Condition>
-  </ExtraConditions>
+    <Condition>
+      <Name>KeyDownRightNowInsideOnly</Name>
+      <Code><![CDATA[return isPlayerInsideVehicle ? Game.IsKeyDownRightNow(Keys.K) : (bool?)null;]]></Code>
+    </Condition>
+  </ExtraConditions>isPlayerInsideVehicle
   <Gadgets>
     <Entry xsi:type="RotatingPart">
       <BoneName>bumper_f</BoneName>
@@ -45,6 +53,20 @@
       <BoneName>bumper_r</BoneName>
       <IsToggle>false</IsToggle>
       <Conditions>KeyDownRightNow</Conditions>
+    </Entry>
+    <Entry xsi:type="RotatingPart">
+      <BoneName>wing_lf</BoneName>
+      <RotationSpeed>1000</RotationSpeed>
+      <RotationAxis X="1" Y="0" Z="0" />
+      <IsToggle>false</IsToggle>
+      <Conditions>KeyDownRightNowInsideOnly</Conditions>
+    </Entry>
+    <Entry xsi:type="RotatingPart">
+      <BoneName>wing_rf</BoneName>
+      <RotationSpeed>1000</RotationSpeed>
+      <RotationAxis X="1" Y="0" Z="0" />
+      <IsToggle>true</IsToggle>
+      <Conditions>KeyDownInsideOnly</Conditions>
     </Entry>
   </Gadgets>
 </VehicleConfig>

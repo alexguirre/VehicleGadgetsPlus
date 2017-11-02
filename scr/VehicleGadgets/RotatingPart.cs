@@ -29,33 +29,50 @@
         {
             if (bone != null)
             {
-                if (isPlayerIn)
+                if (rotatingPartDataEntry.IsToggle)
                 {
-                    if (rotatingPartDataEntry.IsToggle)
+                    bool? value = CheckConditions(isPlayerIn);
+                    if (value.HasValue && value.Value)
                     {
-                        if (CheckConditions())
-                        {
-                            rotating = !rotating;
-                        }
-                    }
-                    else
-                    {
-                        rotating = CheckConditions();
+                        rotating = !rotating;
                     }
                 }
+                else
+                {
+                    bool? value = CheckConditions(isPlayerIn);
+                    if (value.HasValue)
+                    {
+                        rotating = value.Value;
+                    }
+                }
+            }
 
-                if (rotating)
-                {
-                    Vector3 axis = rotatingPartDataEntry.RotationAxis;
-                    float degrees = rotatingPartDataEntry.RotationSpeed * Game.FrameTime;
-                    bone.RotateAxis(axis, degrees);
-                }
+            if (rotating)
+            {
+                Vector3 axis = rotatingPartDataEntry.RotationAxis;
+                float degrees = rotatingPartDataEntry.RotationSpeed * Game.FrameTime;
+                bone.RotateAxis(axis, degrees);
             }
         }
 
-        private bool CheckConditions()
+        private bool? CheckConditions(bool isPlayerIn)
         {
-            return (conditions.Length <= 0 || Array.TrueForAll(conditions, (c) => c(Vehicle)));
+            if (conditions.Length <= 0)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < conditions.Length; i++)
+            {
+                bool? v = conditions[i].Invoke(Vehicle, isPlayerIn);
+                if (!v.HasValue)
+                    return null;
+
+                if (!v.Value)
+                    return false;
+            }
+
+            return true;
         }
     }
 }

@@ -29,21 +29,23 @@
         {
             if (bone != null)
             {
-                if (isPlayerIn)
+                if (hideablePartDataEntry.IsToggle)
                 {
-                    if (hideablePartDataEntry.IsToggle)
+                    bool? value = CheckConditions(isPlayerIn);
+                    if (value.HasValue && value.Value)
                     {
-                        if (CheckConditions())
-                        {
-                            visible = !visible;
+                        visible = !visible;
 
-                            UpdateBone();
-                        }
+                        UpdateBone();
                     }
-                    else
+                }
+                else
+                {
+                    bool? value = CheckConditions(isPlayerIn);
+                    if (value.HasValue)
                     {
                         bool prevVisible = visible;
-                        visible = !CheckConditions();
+                        visible = !value.Value;
 
                         if (visible != prevVisible)
                         {
@@ -69,9 +71,24 @@
         }
 
 
-        private bool CheckConditions()
+        private bool? CheckConditions(bool isPlayerIn)
         {
-            return (conditions.Length <= 0 || Array.TrueForAll(conditions, (c) => c(Vehicle)));
+            if(conditions.Length <= 0)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < conditions.Length; i++)
+            {
+                bool? v = conditions[i].Invoke(Vehicle, isPlayerIn);
+                if (!v.HasValue)
+                    return null;
+
+                if (!v.Value)
+                    return false;
+            }
+
+            return true;
         }
     }
 }

@@ -17,7 +17,7 @@
 
     internal static class Conditions
     {
-        public delegate bool ConditionDelegate(Vehicle vehicle);
+        public delegate bool? ConditionDelegate(Vehicle vehicle, bool isPlayerInsideVehicle);
 
         private const string ConditionBaseCodeTemplate = @"
 using System;
@@ -32,7 +32,7 @@ class __ConditionCode__
 }}
 ";
         private const string ConditionMethodCodeTemplate = @"
-    public static bool {0}(Vehicle vehicle)
+    public static bool? {0}(Vehicle vehicle, bool isPlayerInsideVehicle)
     {{
         {1}
     }}
@@ -97,7 +97,6 @@ class __ConditionCode__
             Game.LogTrivial("Compiling conditions...");
 
             StringBuilder methods = new StringBuilder();
-            int entriesCount = 0;
             List<string> entriesNames = new List<string>();
             if (defaultEntries != null)
             {
@@ -105,7 +104,6 @@ class __ConditionCode__
                 {
                     string name = entry.Name;
                     methods.AppendFormat(ConditionMethodCodeTemplate, entry.Name, entry.Code);
-                    entriesCount++;
                     entriesNames.Add(name);
                 }
             }
@@ -117,7 +115,6 @@ class __ConditionCode__
                     {
                         string name = GetMethodNameFor(extraEntriesPair.Key, entry.Name);
                         methods.AppendFormat(ConditionMethodCodeTemplate, name, entry.Code);
-                        entriesCount++;
                         entriesNames.Add(name);
                     }
                 }
@@ -131,7 +128,7 @@ class __ConditionCode__
             parameters.IncludeDebugInformation = false;
             parameters.GenerateInMemory = true;
             parameters.GenerateExecutable = false;
-            parameters.CompilerOptions = "/optimize";
+            parameters.CompilerOptions = "/optimize /platform:x64";
             parameters.ReferencedAssemblies.AddRange(new[] { "mscorlib.dll", "System.dll", "System.Core.dll", "System.Dynamic.dll", "System.Windows.Forms.dll", "System.Drawing.dll", "Microsoft.CSharp.dll", typeof(Vehicle).Assembly.Location });
             CSharpCodeProvider provider = new CSharpCodeProvider();
             CompilerResults results = provider.CompileAssemblyFromSource(parameters, code);
@@ -143,11 +140,13 @@ class __ConditionCode__
                 foreach (CompilerError e in results.Errors)
                     Game.LogTrivial("       " + e.ToString());
             }
-
-            Type type = results.CompiledAssembly.GetType("__ConditionCode__");
-            foreach (string name in entriesNames)
+            else
             {
-                conditionsByName.Add(name, (ConditionDelegate)type.GetMethod(name).CreateDelegate(typeof(ConditionDelegate)));
+                Type type = results.CompiledAssembly.GetType("__ConditionCode__");
+                foreach (string name in entriesNames)
+                {
+                    conditionsByName.Add(name, (ConditionDelegate)type.GetMethod(name).CreateDelegate(typeof(ConditionDelegate)));
+                }
             }
         }
 
