@@ -8,7 +8,7 @@
     [XmlType(TypeName = XmlName)]
     public sealed class OutriggersEntry : VehicleGadgetEntry
     {
-        public const string XmlName = "Outriggers";
+        public const string XmlName = nameof(VehicleGadgets.Outriggers);
 
         [XmlIgnore] public override Type GadgetType { get; } = typeof(Outriggers);
 

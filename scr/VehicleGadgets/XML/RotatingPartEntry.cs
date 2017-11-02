@@ -8,7 +8,7 @@
     [XmlType(TypeName = XmlName)]
     public sealed class RotatingPartEntry : VehicleGadgetEntry
     {
-        public const string XmlName = "RotatingPart";
+        public const string XmlName = nameof(RotatingPart);
 
         [XmlIgnore] public override Type GadgetType { get; } = typeof(RotatingPart);
 
