@@ -2,7 +2,6 @@
 {
     using System;
     using System.IO;
-    using System.Xml.Serialization;
 
     using Rage;
     using Rage.Exceptions;
@@ -63,16 +62,6 @@
                 return (T)ser.Deserialize(r);
             }
         }
-    }
-
-    public sealed class XYZ
-    {
-        [XmlAttribute] public float X { get; set; }
-        [XmlAttribute] public float Y { get; set; }
-        [XmlAttribute] public float Z { get; set; }
-
-        public static implicit operator Vector3(XYZ value) => new Vector3(value.X, value.Y, value.Z);
-        public static implicit operator XYZ(Vector3 value) => new XYZ { X = value.X, Y = value.Y, Z = value.Z };
     }
 
     internal static class MatrixUtils

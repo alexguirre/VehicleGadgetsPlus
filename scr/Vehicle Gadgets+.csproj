@@ -81,8 +81,14 @@
     <Compile Include="VehicleGadgets\SoundEffect.cs" />
     <Compile Include="VehicleGadgets\ToggleablePart.cs" />
     <Compile Include="VehicleGadgets\VehicleGadget.cs" />
+    <Compile Include="VehicleGadgets\XML\LadderEntry.cs" />
+    <Compile Include="VehicleGadgets\XML\OutriggersEntry.cs" />
+    <Compile Include="VehicleGadgets\XML\RotatoryPartEntry.cs" />
+    <Compile Include="VehicleGadgets\XML\SoundEffectSet.cs" />
+    <Compile Include="VehicleGadgets\XML\HideablePartEntry.cs" />
     <Compile Include="VehicleGadgets\XML\VehicleConfig.cs" />
     <Compile Include="VehicleGadgets\XML\VehicleGadgetEntry.cs" />
+    <Compile Include="VehicleGadgets\XML\XmlVector3.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

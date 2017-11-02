@@ -6,23 +6,23 @@
     
     using VehicleGadgetsPlus.VehicleGadgets.XML;
 
-    internal sealed class ToggleablePart : VehicleGadget
+    internal sealed class HideablePart : VehicleGadget
     {
-        private readonly ToggleablePartEntry toggleablePartDataEntry;
+        private readonly HideablePartEntry hideablePartDataEntry;
         private readonly Condition.ConditionDelegate[] toggleConditions;
         private readonly VehicleBone bone;
         private bool visible = true;
 
-        public ToggleablePart(Vehicle vehicle, VehicleGadgetEntry dataEntry) : base(vehicle, dataEntry)
+        public HideablePart(Vehicle vehicle, VehicleGadgetEntry dataEntry) : base(vehicle, dataEntry)
         {
-            toggleablePartDataEntry = (ToggleablePartEntry)dataEntry;
+            hideablePartDataEntry = (HideablePartEntry)dataEntry;
 
-            if (!VehicleBone.TryGetForVehicle(vehicle, toggleablePartDataEntry.BoneName, out bone))
+            if (!VehicleBone.TryGetForVehicle(vehicle, hideablePartDataEntry.BoneName, out bone))
             {
-                throw new InvalidOperationException($"The model \"{vehicle.Model.Name}\" doesn't have the bone \"{toggleablePartDataEntry.BoneName}\" for the ToggleablePart");
+                throw new InvalidOperationException($"The model \"{vehicle.Model.Name}\" doesn't have the bone \"{hideablePartDataEntry.BoneName}\" for the {HideablePartEntry.XmlName}");
             }
 
-            toggleConditions = Condition.GetConditionsFromString(toggleablePartDataEntry.ToggleConditions);
+            toggleConditions = Condition.GetConditionsFromString(hideablePartDataEntry.ToggleConditions);
         }
 
         public override void Update(bool isPlayerIn)
