@@ -134,7 +134,7 @@
                 }
             }
 
-            Conditions.CompileConditions(extraConditions);
+            Conditions.LoadConditions(extraConditions);
         }
     }
 }
