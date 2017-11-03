@@ -18,6 +18,7 @@
     {
         public delegate bool? ConditionDelegate(Vehicle vehicle, bool isPlayerInsideVehicle);
 
+        private const string ConditionCodeClassName = "__ConditionCode__";
         private const string ConditionBaseCodeTemplate = @"
 using System;
 using System.Linq;
@@ -25,7 +26,7 @@ using System.Windows.Forms;
 using Rage;
 using Rage.Native;
 
-class __ConditionCode__
+static class " + ConditionCodeClassName + @"
 {{
     {0}
 }}
@@ -98,6 +99,7 @@ class __ConditionCode__
                 CompileConditions(defaultEntries, extraConditionsByModel);
             }
         }
+
         private static void CompileConditions(ConditionEntry[] defaultEntries, Dictionary<Model, ConditionEntry[]> extraConditionsByModel)
         {
             Game.LogTrivial("Compiling conditions");
@@ -148,15 +150,14 @@ class __ConditionCode__
             }
             else
             {
-                Type type = results.CompiledAssembly.GetType("__ConditionCode__");
+                Type type = results.CompiledAssembly.GetType(ConditionCodeClassName);
                 foreach (string name in entriesNames)
                 {
                     conditionsByName.Add(name, (ConditionDelegate)type.GetMethod(name).CreateDelegate(typeof(ConditionDelegate)));
                 }
 
-
                 Game.LogTrivial("Conditions compiled, saving to cache");
-                new CompiledConditionsCacheFile(CompiledConditionsCacheFile.GetCurrentXmlFiles(), results.CompiledAssembly).Write(Plugin.ConditionsFolder + "CompiledConditions.cache");
+                new CompiledConditionsCacheFile(CompiledConditionsCacheFile.GetCurrentXmlFiles(), results.CompiledAssembly).Write(CompiledConditionsCacheFilePath);
             }
         }
 
@@ -192,7 +193,7 @@ class __ConditionCode__
                             }
                         }
 
-                        Type type = cacheFile.LoadAssembly().GetType("__ConditionCode__");
+                        Type type = cacheFile.LoadAssembly().GetType(ConditionCodeClassName);
                         foreach (string name in names)
                         {
                             conditionsByName.Add(name, (ConditionDelegate)type.GetMethod(name).CreateDelegate(typeof(ConditionDelegate)));
