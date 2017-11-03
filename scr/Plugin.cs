@@ -6,9 +6,9 @@
     using Rage;
 
     using VehicleGadgetsPlus.Memory;
+    using VehicleGadgetsPlus.Conditions.XML;
     using VehicleGadgetsPlus.VehicleGadgets;
     using VehicleGadgetsPlus.VehicleGadgets.XML;
-    using VehicleGadgetsPlus.VehicleGadgets.XML.Conditions;
 
     internal static unsafe class Plugin
     {
@@ -134,7 +134,7 @@
                 }
             }
 
-            Conditions.LoadConditions(extraConditions);
+            Conditions.Conditions.LoadConditions(extraConditions);
         }
     }
 }

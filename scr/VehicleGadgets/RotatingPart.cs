@@ -3,13 +3,14 @@
     using System;
 
     using Rage;
-    
+
+    using VehicleGadgetsPlus.Conditions;
     using VehicleGadgetsPlus.VehicleGadgets.XML;
 
     internal sealed class RotatingPart : VehicleGadget
     {
         private readonly RotatingPartEntry rotatingPartDataEntry;
-        private readonly Conditions.ConditionDelegate[] conditions;
+        private readonly ConditionDelegate[] conditions;
         private readonly VehicleBone bone;
         private bool rotating;
 

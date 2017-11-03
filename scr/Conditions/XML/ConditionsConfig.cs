@@ -1,4 +1,4 @@
-﻿namespace VehicleGadgetsPlus.VehicleGadgets.XML.Conditions
+﻿namespace VehicleGadgetsPlus.Conditions.XML
 {
     using System.Xml.Serialization;
 

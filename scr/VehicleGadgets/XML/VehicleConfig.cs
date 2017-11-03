@@ -2,7 +2,7 @@
 {
     using System.Xml.Serialization;
 
-    using VehicleGadgetsPlus.VehicleGadgets.XML.Conditions;
+    using VehicleGadgetsPlus.Conditions.XML;
 
     public class VehicleConfig
     {

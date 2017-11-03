@@ -1,4 +1,4 @@
-﻿namespace VehicleGadgetsPlus.VehicleGadgets
+﻿namespace VehicleGadgetsPlus.Conditions
 {
     using System;
     using System.IO;
@@ -12,12 +12,12 @@
 
     using Rage;
 
-    using VehicleGadgetsPlus.VehicleGadgets.XML.Conditions;
+    using VehicleGadgetsPlus.Conditions.XML;
+
+    public delegate bool? ConditionDelegate(Vehicle vehicle, bool isPlayerInsideVehicle);
 
     internal static class Conditions
     {
-        public delegate bool? ConditionDelegate(Vehicle vehicle, bool isPlayerInsideVehicle);
-
         private const string ConditionCodeClassName = "__ConditionCode__";
         private const string ConditionBaseCodeTemplate = @"
 using System;

@@ -3,13 +3,14 @@
     using System;
 
     using Rage;
-    
+
+    using VehicleGadgetsPlus.Conditions;
     using VehicleGadgetsPlus.VehicleGadgets.XML;
 
     internal sealed class HideablePart : VehicleGadget
     {
         private readonly HideablePartEntry hideablePartDataEntry;
-        private readonly Conditions.ConditionDelegate[] conditions;
+        private readonly ConditionDelegate[] conditions;
         private readonly VehicleBone bone;
         private bool visible = true;
 
