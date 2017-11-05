@@ -132,13 +132,4 @@
             return translation;
         }
     }
-
-    internal static class QuaternionUtils
-    {
-        public static float Angle(Quaternion a, Quaternion b)
-        {
-            float f = Quaternion.Dot(a, b);
-            return (float)(Math.Acos(Math.Min(Math.Abs(f), 1f)) * 2f * 57.29578f);
-        }
-    }
 }

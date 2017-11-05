@@ -58,7 +58,6 @@
     <Compile Include="Memory\NativeVector.cs" />
     <Compile Include="Memory\phBound.cs" />
     <Compile Include="Memory\phBoundComposite.cs" />
-    <Compile Include="Memory\phBoundGeometry.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Memory\CEntitySkeleton.cs" />
     <Compile Include="Memory\crSkeletonData.cs" />
