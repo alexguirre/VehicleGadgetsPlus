@@ -21,7 +21,7 @@
       <Name>KeyDownRightNowInsideOnly</Name>
       <Code><![CDATA[return isPlayerInsideVehicle ? Game.IsKeyDownRightNow(Keys.K) : (bool?)null;]]></Code>
     </Condition>
-  </ExtraConditions>isPlayerInsideVehicle
+  </ExtraConditions>
   <Gadgets>
     <Entry xsi:type="RotatingPart">
       <BoneName>bumper_f</BoneName>
