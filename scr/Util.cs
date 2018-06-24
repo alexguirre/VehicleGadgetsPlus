@@ -132,4 +132,71 @@
             return translation;
         }
     }
+
+    internal static class QuaternionUtils
+    {
+        // based on MyQuaternion.SlerpUnclamped from https://gist.github.com/aeroson/043001ca12fe29ee911e
+        public static Quaternion Slerp(Quaternion a, Quaternion b, float t, bool longestPath)
+        {
+            return Slerp(ref a, ref b, t, longestPath);
+        }
+
+        public static Quaternion Slerp(ref Quaternion a, ref Quaternion b, float t, bool longestPath)
+        {
+            // if either input is zero, return the other.
+            if (a.LengthSquared() == 0.0f)
+            {
+                if (b.LengthSquared() == 0.0f)
+                {
+                    return Quaternion.Identity;
+                }
+                return b;
+            }
+            else if (b.LengthSquared() == 0.0f)
+            {
+                return a;
+            }
+
+
+            float cosHalfAngle = a.W * b.W + Vector3.Dot(new Vector3(a.X, a.Y, a.Z), new Vector3(b.X, b.Y, b.Z));
+
+            if (cosHalfAngle >= 1.0f || cosHalfAngle <= -1.0f)
+            {
+                // angle = 0.0f, so just return one input.
+                return a;
+            }
+            else if (longestPath || (!longestPath && cosHalfAngle < 0.0f))
+            {
+                b.X = -b.X;
+                b.Y = -b.Y;
+                b.Z = -b.Z;
+                b.W = -b.W;
+                cosHalfAngle = -cosHalfAngle;
+            }
+
+            float blendA;
+            float blendB;
+            if (cosHalfAngle < 0.99f)
+            {
+                // do proper slerp for big angles
+                float halfAngle = (float)System.Math.Acos(cosHalfAngle);
+                float sinHalfAngle = (float)System.Math.Sin(halfAngle);
+                float oneOverSinHalfAngle = 1.0f / sinHalfAngle;
+                blendA = (float)System.Math.Sin(halfAngle * (1.0f - t)) * oneOverSinHalfAngle;
+                blendB = (float)System.Math.Sin(halfAngle * t) * oneOverSinHalfAngle;
+            }
+            else
+            {
+                // do lerp if angle is really small.
+                blendA = 1.0f - t;
+                blendB = t;
+            }
+
+            Quaternion result = new Quaternion(blendA * new Vector3(a.X, a.Y, a.Z) + blendB * new Vector3(b.X, b.Y, b.Z), blendA * a.W + blendB * b.W);
+            if (result.LengthSquared() > 0.0f)
+                return Quaternion.Normalize(result);
+            else
+                return Quaternion.Identity;
+        }
+    }
 }

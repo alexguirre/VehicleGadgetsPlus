@@ -13,6 +13,10 @@
         private readonly ConditionDelegate[] conditions;
         private readonly VehicleBone bone;
         private bool rotating;
+        private readonly bool hasRange;
+        private readonly Quaternion rangeMin, rangeMax;
+        private bool rangeIncreasing;
+        private float rangePercentage;
 
         public RotatingPart(Vehicle vehicle, VehicleGadgetEntry dataEntry) : base(vehicle, dataEntry)
         {
@@ -24,6 +28,17 @@
             }
 
             conditions = Conditions.GetConditionsFromString(vehicle.Model, rotatingPartDataEntry.Conditions);
+
+            if (rotatingPartDataEntry.HasRange)
+            {
+                hasRange = true;
+
+                Quaternion min = Quaternion.RotationAxis(rotatingPartDataEntry.RotationAxis, MathHelper.ConvertDegreesToRadians(rotatingPartDataEntry.Range.Min));
+                Quaternion max = Quaternion.RotationAxis(rotatingPartDataEntry.RotationAxis, MathHelper.ConvertDegreesToRadians(rotatingPartDataEntry.Range.Max));
+
+                rangeMin = bone.OriginalRotation * min;
+                rangeMax = bone.OriginalRotation * max;
+            }
         }
 
         public override void Update(bool isPlayerIn)
@@ -50,9 +65,45 @@
 
             if (rotating)
             {
-                Vector3 axis = rotatingPartDataEntry.RotationAxis;
-                float degrees = rotatingPartDataEntry.RotationSpeed * Game.FrameTime;
-                bone.RotateAxis(axis, degrees);
+                if (hasRange)
+                {
+                    {
+                        rangePercentage += rotatingPartDataEntry.RotationSpeed * Game.FrameTime * (rangeIncreasing ? 1.0f : -1.0f);
+                        Quaternion newRotation = QuaternionUtils.Slerp(rangeMin, rangeMax, rangePercentage, rotatingPartDataEntry.Range.LongestPath);
+
+                        bone.SetRotation(newRotation);
+
+                        if ((rangeIncreasing && rangePercentage >= 1.0f) ||
+                            (!rangeIncreasing && rangePercentage <= 0.0f))
+                        {
+                            rangeIncreasing = !rangeIncreasing;
+                        }
+                    }
+
+#if DEBUG
+                    {
+                        Quaternion rotation = MatrixUtils.DecomposeRotation(bone.Matrix);
+
+                        Quaternion vehRot = Vehicle.Orientation;
+                        Vector3 pos = Vehicle.GetBonePosition(bone.Index);
+                        Debug.DrawLine(pos, pos + ((vehRot * rotation).ToVector() * 2.0f), System.Drawing.Color.Red);
+
+                        Debug.DrawLine(pos, pos + ((vehRot * bone.OriginalRotation).ToVector() * 2.0f), System.Drawing.Color.Blue);
+                        
+                        Quaternion minRot = vehRot * rangeMin;
+                        Quaternion maxRot = vehRot * rangeMax;
+
+                        Debug.DrawLine(pos, pos + (minRot.ToVector() * 2.0f), System.Drawing.Color.Green);
+                        Debug.DrawLine(pos, pos + (maxRot.ToVector() * 2.0f), System.Drawing.Color.Purple);
+                    }
+#endif
+                }
+                else
+                {
+                    Vector3 axis = rotatingPartDataEntry.RotationAxis;
+                    float degrees = rotatingPartDataEntry.RotationSpeed * Game.FrameTime;
+                    bone.RotateAxis(axis, degrees);
+                }
             }
         }
 
