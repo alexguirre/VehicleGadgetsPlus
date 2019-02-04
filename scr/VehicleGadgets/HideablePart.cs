@@ -4,14 +4,18 @@
 
     using Rage;
 
+    using VehicleGadgetsPlus.Memory;
     using VehicleGadgetsPlus.Conditions;
     using VehicleGadgetsPlus.VehicleGadgets.XML;
 
-    internal sealed class HideablePart : VehicleGadget
+    internal sealed unsafe class HideablePart : VehicleGadget
     {
         private readonly HideablePartEntry hideablePartDataEntry;
         private readonly ConditionDelegate[] conditions;
         private readonly VehicleBone bone;
+        private readonly bool hasBound;
+        private readonly int boundIndex;
+        private readonly CVehicle* nativeVeh;
         private bool visible = true;
 
         public HideablePart(Vehicle vehicle, VehicleGadgetEntry dataEntry) : base(vehicle, dataEntry)
@@ -24,6 +28,10 @@
             }
 
             conditions = Conditions.GetConditionsFromString(vehicle.Model, hideablePartDataEntry.Conditions);
+
+            nativeVeh = (CVehicle*)vehicle.MemoryAddress;
+            boundIndex = GameFunctions.fragInst_GetBoundIndexForBone(nativeVeh->Inst, bone.Index);
+            hasBound = boundIndex != -1;
         }
 
         public override void Update(bool isPlayerIn)
@@ -61,16 +69,83 @@
         {
             if (visible)
             {
-                // show
-                bone.ResetTranslation();
+                Show();
             }
             else
             {
-                // hide
+                Hide();
+            }
+        }
+
+        private void Show()
+        {
+            if (hasBound)
+            {
+                ShowBound();
+            }
+            else
+            {
+                bone.ResetTranslation();
+            }
+        }
+
+        private void ShowBound()
+        {
+            fragInstGta* inst = nativeVeh->Inst;
+            if (inst == null)
+            {
+                return;
+            }
+
+            fragCacheEntry* entry = inst->CacheEntry;
+            if (entry == null)
+            {
+                return;
+            }
+
+            int** flags = entry->BrokenAndHiddenComponentsFlags;
+            if (flags == null)
+            {
+                return;
+            }
+
+            (*flags)[boundIndex >> 5] &= ~(1 << (boundIndex & 0x1F));
+        }
+
+        private void Hide()
+        {
+            if (hasBound)
+            {
+                HideBound();
+            }
+            else
+            {
                 bone.SetTranslation(new Vector3(0.0f, 0.0f, -99999.9f));
             }
         }
 
+        private void HideBound()
+        {
+            fragInstGta* inst = nativeVeh->Inst;
+            if (inst == null)
+            {
+                return;
+            }
+
+            fragCacheEntry* entry = inst->CacheEntry;
+            if (entry == null)
+            {
+                return;
+            }
+
+            int** flags = entry->BrokenAndHiddenComponentsFlags;
+            if (flags == null)
+            {
+                return;
+            }
+
+            (*flags)[boundIndex >> 5] |= 1 << (boundIndex & 0x1F);
+        }
 
         private bool? CheckConditions(bool isPlayerIn)
         {

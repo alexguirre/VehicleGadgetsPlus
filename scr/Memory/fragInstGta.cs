@@ -15,7 +15,8 @@
     {
         [FieldOffset(0x0118)] public int* BoneIndexToTypeComponent;
         [FieldOffset(0x0120)] public int* TypeComponentToBoneIndex;
-        
+
+        [FieldOffset(0x148 + 0x18)] public int** BrokenAndHiddenComponentsFlags;
         [FieldOffset(0x148 + 0x30)] public crSkeleton* Skeleton;
     }
 }
