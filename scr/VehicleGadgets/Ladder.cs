@@ -5,8 +5,9 @@
     using System.Windows.Forms;
 
     using Rage;
-    
+
     using VehicleGadgetsPlus.VehicleGadgets.XML;
+    using VehicleGadgetsPlus.Memory;
 
     internal sealed class Ladder : VehicleGadget
     {
@@ -15,7 +16,8 @@
                                      ladderMain,
                                      ladderBucket;
         private readonly Extension[] ladderExtensions;
-        
+
+        public override bool RequiresPoseBounds => true;
         public bool HasBase => ladderBase != null;
         public bool HasMain => ladderMain != null;
         public bool HasExtensions => ladderExtensions != null;
@@ -99,10 +101,13 @@
             base.Dispose(disposing);
         }
 
-        public override void Update(bool isPlayerIn)
+        public override unsafe void Update(bool isPlayerIn)
         {
+
             if (!isPlayerIn)
+            {
                 return;
+            }
 
             shouldPlaySound = false;
             
@@ -319,6 +324,7 @@
             private readonly VehicleBone bone;
             private readonly Vector3 direction;
 
+            public VehicleBone Bone => bone;
             public float MaxDistanceSqr { get; }
 
             public float CurrentDistanceSqr

@@ -18,6 +18,8 @@
         private bool rangeIncreasing;
         private float rangePercentage;
 
+        public override bool RequiresPoseBounds => true;
+
         public RotatingPart(Vehicle vehicle, VehicleGadgetEntry dataEntry) : base(vehicle, dataEntry)
         {
             rotatingPartDataEntry = (RotatingPartEntry)dataEntry;

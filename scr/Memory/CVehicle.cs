@@ -6,6 +6,6 @@
     [StructLayout(LayoutKind.Explicit)]
     internal unsafe struct CVehicle
     {
-        [FieldOffset(0x0030)] public fragInstGta* inst;
+        [FieldOffset(0x0030)] public fragInstGta* Inst;
     }
 }

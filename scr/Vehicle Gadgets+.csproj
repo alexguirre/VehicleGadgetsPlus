@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>VehicleGadgetsPlus</RootNamespace>
-    <AssemblyName>Vehicle Gadgets+</AssemblyName>
+    <AssemblyName>Vehicle Gadgets+ tmp</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -22,6 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>$(VGP_BUILD_PATH)\</OutputPath>
@@ -51,20 +52,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Memory\fragPhysicsLOD.cs" />
-    <Compile Include="Memory\fragPhysicsLODGroup.cs" />
     <Compile Include="Memory\GameFunctions.cs" />
-    <Compile Include="Memory\gtaFragType.cs" />
     <Compile Include="Memory\NativeVector.cs" />
-    <Compile Include="Memory\phBound.cs" />
-    <Compile Include="Memory\phBoundComposite.cs" />
     <Compile Include="Plugin.cs" />
-    <Compile Include="Memory\CEntitySkeleton.cs" />
-    <Compile Include="Memory\crSkeletonData.cs" />
+    <Compile Include="Memory\crSkeleton.cs" />
     <Compile Include="Memory\CVehicle.cs" />
     <Compile Include="Memory\fragInstGta.cs" />
     <Compile Include="Memory\NativeMatrix4x4.cs" />
-    <Compile Include="Memory\phArchetypeDamp.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

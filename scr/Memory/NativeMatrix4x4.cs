@@ -25,6 +25,11 @@
         public float M43;
         public float M44;
 
+        public NativeVector4 M1 => new NativeVector4(M11, M12, M13, M14);
+        public NativeVector4 M2 => new NativeVector4(M21, M22, M23, M24);
+        public NativeVector4 M3 => new NativeVector4(M31, M32, M33, M34);
+        public NativeVector4 M4 => new NativeVector4(M41, M42, M43, M44);
+
         public static implicit operator NativeMatrix4x4(Rage.Matrix matrix)
         {
             return new NativeMatrix4x4()

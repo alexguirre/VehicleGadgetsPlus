@@ -30,6 +30,8 @@
 
         private readonly SoundEffect sound;
 
+        public override bool RequiresPoseBounds => true;
+
         public Outriggers(Vehicle vehicle, VehicleGadgetEntry dataEntry) : base(vehicle, dataEntry)
         {
             outriggersDataEntry = (OutriggersEntry)dataEntry;

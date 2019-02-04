@@ -11,6 +11,7 @@
         public Vehicle Vehicle { get; }
         public VehicleGadgetEntry DataEntry { get; }
         public bool IsDisposed { get; private set; }
+        public virtual bool RequiresPoseBounds => false;
 
         protected VehicleGadget(Vehicle vehicle, VehicleGadgetEntry dataEntry)
         {

@@ -20,8 +20,8 @@
                 throw new InvalidHandleableException(vehicle);
 
             CVehicle* veh = (CVehicle*)vehicle.MemoryAddress;
-            crSkeletonData* skelData = veh->inst->archetype->skeleton->skeletonData;
-            uint boneCount = skelData->bonesCount;
+            crSkeletonData* skelData = veh->Inst->CacheEntry->Skeleton->Data;
+            uint boneCount = skelData->NumBones;
 
             for (uint i = 0; i < boneCount; i++)
             {
@@ -35,14 +35,14 @@
         public static Vector3 GetBoneOriginalTranslation(Vehicle vehicle, int index)
         {
             CVehicle* veh = (CVehicle*)vehicle.MemoryAddress;
-            NativeVector3 v = veh->inst->archetype->skeleton->skeletonData->bones[index].translation;
+            NativeVector3 v = veh->Inst->CacheEntry->Skeleton->Data->Bones[index].Translation;
             return v;
         }
 
         public static Quaternion GetBoneOriginalRotation(Vehicle vehicle, int index)
         {
             CVehicle* veh = (CVehicle*)vehicle.MemoryAddress;
-            NativeVector4 v = veh->inst->archetype->skeleton->skeletonData->bones[index].rotation;
+            NativeVector4 v = veh->Inst->CacheEntry->Skeleton->Data->Bones[index].Rotation;
             return v;
         }
 

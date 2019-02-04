@@ -18,6 +18,7 @@
 
         private static HashSet<PoolHandle> vehiclesChecked = new HashSet<PoolHandle>();
         private static List<VehicleGadget> gadgets = new List<VehicleGadget>();
+        private static HashSet<Vehicle> vehiclesRequiringPoseBounds = new HashSet<Vehicle>();
 
         public static Dictionary<Model, VehicleConfig> VehicleConfigsByModel = new Dictionary<Model, VehicleConfig>();
 
@@ -60,6 +61,10 @@
                     if (g.Vehicle)
                     {
                         g.Update(g.Vehicle == playerVeh);
+                        if (g.RequiresPoseBounds)
+                        {
+                            vehiclesRequiringPoseBounds.Add(g.Vehicle);
+                        }
                     }
                     else
                     {
@@ -71,6 +76,20 @@
                         gadgets.RemoveAt(i);
                     }
                 }
+
+
+                foreach (Vehicle v in vehiclesRequiringPoseBounds)
+                {
+                    CVehicle* cveh = (CVehicle*)v.MemoryAddress;
+                    fragInstGta* inst = cveh->Inst;
+                    if (inst == null)
+                    {
+                        return;
+                    }
+
+                    GameFunctions.fragInst_PoseBoundsFromSkeleton(inst, true, true, true, 0, 0);
+                }
+                vehiclesRequiringPoseBounds.Clear();
             }
         }
 

@@ -8,14 +8,14 @@
     {
         private readonly Vehicle vehicle;
         private readonly int index;
-        private readonly phArchetypeDamp* archetype;
+        private readonly fragInstGta* inst;
 
         public Vehicle Vehicle => vehicle;
         public int Index => index;
         public Matrix Matrix
         {
-            get => archetype->skeleton->desiredBonesMatricesArray[index];
-            set => archetype->skeleton->desiredBonesMatricesArray[index] = value;
+            get => inst->CacheEntry->Skeleton->ObjectMatrices[index];
+            set => inst->CacheEntry->Skeleton->ObjectMatrices[index] = value;
         }
 
         public Vector3 OriginalTranslation { get; }
@@ -27,7 +27,7 @@
             this.index = index;
 
             CVehicle* veh = ((CVehicle*)vehicle.MemoryAddress);
-            archetype = veh->inst->archetype;
+            inst = veh->Inst;
 
             OriginalTranslation = Util.GetBoneOriginalTranslation(vehicle, index);
             OriginalRotation = Util.GetBoneOriginalRotation(vehicle, index);
@@ -35,21 +35,21 @@
 
         public void RotateAxis(Vector3 axis, float degrees)
         {
-            NativeMatrix4x4* matrix = &(archetype->skeleton->desiredBonesMatricesArray[index]);
+            NativeMatrix4x4* matrix = &(inst->CacheEntry->Skeleton->ObjectMatrices[index]);
             Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.RotationAxis(axis, MathHelper.ConvertDegreesToRadians(degrees)) * (*matrix);
             *matrix = newMatrix;
         }
 
         public void Translate(Vector3 translation)
         {
-            NativeMatrix4x4* matrix = &(archetype->skeleton->desiredBonesMatricesArray[index]);
+            NativeMatrix4x4* matrix = &(inst->CacheEntry->Skeleton->ObjectMatrices[index]);
             Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.Translation(translation) * (*matrix);
             *matrix = newMatrix;
         }
 
         public void SetRotation(Quaternion rotation)
         {
-            NativeMatrix4x4* matrix = &(archetype->skeleton->desiredBonesMatricesArray[index]);
+            NativeMatrix4x4* matrix = &(inst->CacheEntry->Skeleton->ObjectMatrices[index]);
             MatrixUtils.Decompose(*matrix, out Vector3 scale, out _, out Vector3 translation);
             Matrix newMatrix = Matrix.Scaling(scale) * Matrix.RotationQuaternion(rotation) * Matrix.Translation(translation);
             *matrix = newMatrix;
@@ -57,7 +57,7 @@
 
         public void SetTranslation(Vector3 translation)
         {
-            NativeMatrix4x4* matrix = &(archetype->skeleton->desiredBonesMatricesArray[index]);
+            NativeMatrix4x4* matrix = &(inst->CacheEntry->Skeleton->ObjectMatrices[index]);
             matrix->M41 = translation.X;
             matrix->M42 = translation.Y;
             matrix->M43 = translation.Z;
