@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>VehicleGadgetsPlus</RootNamespace>
-    <AssemblyName>Vehicle Gadgets+ tmp</AssemblyName>
+    <AssemblyName>Vehicle Gadgets+</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
